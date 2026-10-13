@@ -15,7 +15,7 @@ You need **Python 3.10 or newer** and a `PORTKEY_API_KEY`. No other software, ac
 **1. Clone the repo and go into it**
 
 ```bash
-git clone <this-repo-url> before-you-sign
+git clone https://github.com/madelineanh/before-you-sign.git
 cd before-you-sign
 ```
 
