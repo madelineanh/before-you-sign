@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before You Sign · New Haven renter check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="masthead">
+  <p class="eyebrow">New Haven, Connecticut</p>
+  <h1>Before You Sign</h1>
+  <p class="tagline">A careful look at the apartment, the landlord, and the lease, so you can sign with confidence.</p>
+</header>
+
+<main>
+  <section class="card" id="form-card">
+    <form id="check-form">
+      <label class="field-label" for="address">Apartment address</label>
+      <input id="address" name="address" type="text" autocomplete="street-address"
+             placeholder="e.g. 31 Chapel St, New Haven, CT" required minlength="5" maxlength="200">
+      <p class="hint">Try one:
+        <button type="button" class="chip" data-address="31 Chapel St, New Haven, CT">31 Chapel St</button>
+        <button type="button" class="chip" data-address="100 Howe St, New Haven, CT">100 Howe St</button>
+        <button type="button" class="chip" data-address="224 Wooster St, New Haven, CT">224 Wooster St</button>
+      </p>
+
+      <fieldset class="lease-options">
+        <legend class="field-label">Your lease <span class="optional">(optional)</span></legend>
+        <label class="radio"><input type="radio" name="lease_mode" value="none" checked> No lease yet</label>
+        <label class="radio"><input type="radio" name="lease_mode" value="upload"> Upload my lease (PDF or .txt)</label>
+        <label class="radio"><input type="radio" name="lease_mode" value="sample"> Try a sample lease</label>
+        <div id="upload-row" class="sub-row" hidden>
+          <input id="lease-file" type="file" accept=".pdf,.txt">
+          <p class="hint">Your lease is read once for this check and is not stored.</p>
+        </div>
+        <div id="sample-row" class="sub-row" hidden>
+          <select id="sample-lease"></select>
+          <a id="sample-link" href="#" target="_blank" rel="noopener">View this sample</a>
+        </div>
+      </fieldset>
+
+      <button id="submit" type="submit" class="primary">Check this apartment</button>
+      <p id="form-error" class="error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section class="card" id="progress-card" hidden>
+    <h2>Your advisors are at work</h2>
+    <p class="muted" id="progress-status">Getting started…</p>
+    <ul class="team" id="team">
+      <li data-agent="Lead Advisor"><span class="dot"></span><div><strong>Lead Advisor</strong><span>Coordinates the team and writes your report</span></div><em>waiting</em></li>
+      <li data-agent="Landlord Investigator"><span class="dot"></span><div><strong>Landlord Investigator</strong><span>Property records, owner portfolio, CT business registry</span></div><em>waiting</em></li>
+      <li data-agent="Neighborhood Scout"><span class="dot"></span><div><strong>Neighborhood Scout</strong><span>311 reports, eviction filings, flood zone</span></div><em>waiting</em></li>
+      <li data-agent="Lease Reviewer"><span class="dot"></span><div><strong>Lease Reviewer</strong><span>Your lease against Connecticut law</span></div><em>waiting</em></li>
+    </ul>
+    <details class="activity" open>
+      <summary>What they're doing</summary>
+      <ol id="activity"></ol>
+    </details>
+  </section>
+
+  <section id="report" hidden></section>
+</main>
+
+<footer>
+  <p>Before You Sign uses public records from data.ct.gov, the U.S. Census Bureau, New Haven 311 (SeeClickFix), Eviction Lab and FEMA.
+  It is not legal advice. For help with a lease, contact <a href="https://ctlawhelp.org" target="_blank" rel="noopener">CTLawHelp</a> or New Haven Legal Assistance.</p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

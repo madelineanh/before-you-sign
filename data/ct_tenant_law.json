@@ -1,0 +1,145 @@
+{
+  "source_note": "Summaries of the Connecticut General Statutes, Title 47a (Landlord and Tenant), checked against the official text at cga.ct.gov on 2026-10-13. These are plain-English summaries for screening a lease, not legal advice.",
+  "rules": [
+    {
+      "id": "CT-47a-4-a1",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(1)",
+      "topic": "Waiving tenant rights",
+      "rule": "A lease may not make the tenant waive or forfeit rights or remedies under the landlord-tenant statutes (or other statutes and ordinances, unless that law expressly allows waiver). Such a clause is unenforceable (§ 47a-4(b)).",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a2",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(2)",
+      "topic": "Confession of judgment",
+      "rule": "A lease may not authorize the landlord to confess judgment against the tenant on a claim arising from the lease.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a3",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(3)",
+      "topic": "Landlord liability waivers and indemnity",
+      "rule": "A lease may not make the tenant agree to excuse or limit the landlord's legal liability, or to indemnify the landlord for that liability or its costs.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a4",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(4)",
+      "topic": "Interest on security deposit",
+      "rule": "A lease may not make the tenant waive the right to interest on the security deposit under § 47a-21.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a5",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(5)",
+      "topic": "Lockouts / eviction without court",
+      "rule": "A lease may not let the landlord remove (dispossess) the tenant without a court order.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a6",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(6)",
+      "topic": "Seizing tenant property for rent",
+      "rule": "A lease may not make the tenant consent to the landlord seizing (distraining) the tenant's property for unpaid rent.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a7",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(7)",
+      "topic": "Attorney's fees",
+      "rule": "A lease may not make the tenant pay the landlord's attorney's fees above 15 percent of any judgment against the tenant in a case where money damages are awarded.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a8",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(8)",
+      "topic": "Late fee before grace period / early-payment 'discounts'",
+      "rule": "A lease may not charge a late fee before the statutory grace period ends, or set rent as a 'discounted' amount if paid before the grace period ends.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a9",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(9)",
+      "topic": "Late fee amount",
+      "rule": "A lease may not charge a late fee larger than the limits in § 47a-15a.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-4-a10",
+      "citation": "Conn. Gen. Stat. § 47a-4(a)(10)",
+      "topic": "Heat or utility surcharge",
+      "rule": "If heat or utilities are included in the lease, the lease may not add a heat or utilities surcharge.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
+    },
+    {
+      "id": "CT-47a-15a-a",
+      "citation": "Conn. Gen. Stat. § 47a-15a(a)",
+      "topic": "Grace period",
+      "rule": "Rent is not considered late for termination purposes until 9 days after it is due (4 days for a week-to-week tenancy). This 9-day (or 4-day) window is the 'grace period'.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-15a"
+    },
+    {
+      "id": "CT-47a-15a-b",
+      "citation": "Conn. Gen. Stat. § 47a-15a(b)",
+      "topic": "Late fee cap",
+      "rule": "A late fee may be charged only after the grace period and may not exceed the lesser of (1) $5 per day up to a maximum of $50, or (2) 5 percent of the late rent payment. Only one late fee may be charged per late payment, however long it stays unpaid.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-15a"
+    },
+    {
+      "id": "CT-47a-16",
+      "citation": "Conn. Gen. Stat. § 47a-16",
+      "topic": "Landlord entry",
+      "rule": "Except in an emergency, the landlord must give reasonable written or oral notice before entering and may enter only at reasonable times. The landlord may not abuse the right of entry or use it to harass the tenant. Without the tenant's consent, entry is allowed only in an emergency, under § 47a-16a (extended absence), with a court order, or if the unit is abandoned.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-16"
+    },
+    {
+      "id": "CT-47a-4d",
+      "citation": "Conn. Gen. Stat. § 47a-4d",
+      "topic": "Application, screening, move-in and move-out fees",
+      "rule": "A landlord may not charge a prospective tenant any fee to process, review or accept a rental application, and may not charge move-in or move-out fees. The only up-front charges allowed are a security deposit, first month's rent, a key or special-equipment deposit, and a tenant screening report fee capped at $50 (adjusted annually for inflation by the Commissioner of Housing). A landlord who charges a screening fee must give the tenant a copy of the report (or how to get it) and the receipt.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4d"
+    },
+    {
+      "id": "CT-47a-4c",
+      "citation": "Conn. Gen. Stat. § 47a-4c",
+      "topic": "Electronic-only rent payment",
+      "rule": "For leases signed on or after October 1, 2013, a landlord may not require electronic funds transfer as the only way to pay rent or the security deposit.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4c"
+    },
+    {
+      "id": "CT-47a-4e",
+      "citation": "Conn. Gen. Stat. § 47a-4e",
+      "topic": "Rent increase notice",
+      "rule": "A rent increase is not effective unless the landlord gives written notice at least 45 days before it takes effect (for leases of one month or less, notice equal to one full lease term). A tenant's silence is not agreement. This does not allow raising rent during the lease term.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4e"
+    },
+    {
+      "id": "CT-47a-6",
+      "citation": "Conn. Gen. Stat. § 47a-6",
+      "topic": "Landlord identification",
+      "rule": "By the start of the tenancy the landlord must tell the tenant in writing the name and address of the person managing the premises and the person authorized to receive notices and legal papers, and keep that information current.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-6"
+    },
+    {
+      "id": "CT-47a-7",
+      "citation": "Conn. Gen. Stat. § 47a-7(a)",
+      "topic": "Landlord repair duties",
+      "rule": "The landlord must follow building and housing codes affecting health and safety; make repairs to keep the premises fit and habitable; keep common areas clean and safe; maintain electrical, plumbing, sanitary, heating, ventilating and other supplied facilities and appliances; provide trash receptacles and removal; and supply running water, reasonable hot water and reasonable heat (unless these are under the tenant's exclusive control or supplied by a direct utility connection). Shifting duties to the tenant is limited: for a single-family home, a good-faith written agreement may have the tenant handle trash, water/heat supply and specified repairs (§ 47a-7(c)); for other units, a good-faith written agreement may have the tenant do specified repairs or maintenance only if the work is not needed to fix code violations or make the unit habitable, and it does not reduce the landlord's duties to other tenants (§ 47a-7(d)).",
+      "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-7"
+    },
+    {
+      "id": "CT-47a-21-b",
+      "citation": "Conn. Gen. Stat. § 47a-21(b)",
+      "topic": "Security deposit maximum",
+      "rule": "A landlord may not demand a security deposit of more than two months' rent from a tenant under 62, or more than one month's rent from a tenant 62 or older.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_831.htm#sec_47a-21"
+    },
+    {
+      "id": "CT-47a-21-d",
+      "citation": "Conn. Gen. Stat. § 47a-21(d)(2)",
+      "topic": "Security deposit return deadline",
+      "rule": "After the tenancy ends, the landlord must return the deposit plus accrued interest (or the balance with a written, itemized list of damages deducted) within 21 days, or within 15 days of receiving the tenant's written forwarding address, whichever is later.",
+      "url": "https://www.cga.ct.gov/current/pub/chap_831.htm#sec_47a-21"
+    }
+  ]
+}
