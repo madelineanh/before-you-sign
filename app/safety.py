@@ -84,7 +84,10 @@ class Evidence:
     data: Any
 
     def as_text(self) -> str:
-        return self.data if isinstance(self.data, str) else json.dumps(self.data, default=str)
+        # The source label is part of the evidence (e.g. "Conn. Gen. Stat. § 47a-4(a)(10)"), so a finding
+        # may repeat the citation's numbers.
+        body = self.data if isinstance(self.data, str) else json.dumps(self.data, default=str)
+        return f"{self.source} {body}"
 
 
 class Ledger:
@@ -157,7 +160,8 @@ def check_finding(finding: Any, ledger: Ledger, extra_context: str = "") -> list
 
     squashed_haystack = _squash(haystack)
     for quote in _QUOTE_RE.findall(claim):
-        if _squash(quote) not in squashed_haystack:
+        # A quote may end with the writer's own punctuation ("... Chapter 830.").
+        if _squash(quote).rstrip(".,;:!? ") not in squashed_haystack:
             problems.append(
                 f"'{finding.title}' quotes text that does not appear word-for-word in its cited evidence: "
                 f"\"{quote[:80]}\". Quote exactly or paraphrase without quotation marks."

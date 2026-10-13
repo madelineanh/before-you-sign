@@ -136,7 +136,8 @@ function addActivity(html, cls = "") {
 function handleEvent(ev) {
   switch (ev.kind) {
     case "status":
-      $("#progress-status").textContent = ev.message;
+      $("#progress-status").textContent = ev.message.startsWith("Matched ")
+        ? `Matched ${prettyAddress(ev.message.slice(8))}` : ev.message;
       break;
     case "agent_start":
       setAgent(ev.agent, "working", "In progress");
@@ -204,6 +205,11 @@ function prettyAddress(raw) {
   return [words, [state, zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 }
 
+// Citations are shown under each finding, so drop raw IDs like "[CT-47a-21-b]" or "(E3)" from the prose.
+function stripIds(text) {
+  return String(text).replace(/\s*[\[(](?:CT-[\w-]+|E\d+|LEASE)(?:[,;\s]+(?:CT-[\w-]+|E\d+|LEASE))*[\])]/g, "");
+}
+
 function money(x) { return `$${Number(x).toFixed(4)}`; }
 function n(x) { return Number(x || 0).toLocaleString(); }
 
@@ -213,7 +219,13 @@ function renderReport(result, jobId) {
   const findings = [...r.findings].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
 
   const findingHtml = findings.map((f) => {
-    const srcs = f.evidence_ids.map((id) => {
+    const seen = new Set();
+    const srcs = f.evidence_ids.filter((id) => {
+      const label = evidence[id] ? evidence[id].source : id;  // show each source once
+      if (seen.has(label)) return false;
+      seen.add(label);
+      return true;
+    }).map((id) => {
       const e = evidence[id];
       if (!e) return `<span>${esc(id)}</span>`;
       const label = id === "LEASE" ? "Your lease" : e.source;
@@ -226,8 +238,8 @@ function renderReport(result, jobId) {
         <span class="tag cat">${CATEGORY_WORD[f.category] || esc(f.category)}</span>
       </div>
       <div>
-        <h3>${esc(f.title)}</h3>
-        <p>${esc(f.detail)}</p>
+        <h3>${esc(stripIds(f.title))}</h3>
+        <p>${esc(stripIds(f.detail))}</p>
         <div class="sources">Sources: ${srcs}</div>
       </div>
     </article>`;

@@ -23,6 +23,8 @@ for env_file in (REPO_ROOT / ".env", REPO_ROOT.parent / ".env"):
         load_dotenv(env_file, override=False)
 
 MODEL_NAME = "gpt-6-luna"
+# Reasoning effort for every agent (compared in scripts/benchmark.py).
+REASONING_EFFORT = os.getenv("REASONING_EFFORT", "low")
 PORTKEY_BASE_URL = "https://api.portkey.ai/v1"
 
 # USD per 1M tokens for gpt-6-luna (course pricing table, Lecture 11 pricing.py,
@@ -42,6 +44,10 @@ MAX_TOKENS_PER_CHECK = 600_000  # a 100-page lease is ~75k tokens and is re-read
 MAX_LEASE_CHARS = 300_000  # roughly 100 pages of lease text
 MAX_LEASE_BYTES = 25_000_000  # 25 MB file upload limit
 
+# The course Portkey gateway replays identical requests from its own response cache.
+# Benchmarks and tests set FRESH_RESPONSES=1 so every measurement is a real, independent model call.
+FRESH_RESPONSES = os.getenv("FRESH_RESPONSES", "0") == "1"
+
 # Set SAFETY_FILTERS=off only to demonstrate what happens without the defenses.
 SAFETY_FILTERS_ON = os.getenv("SAFETY_FILTERS", "on").lower() != "off"
 
@@ -55,20 +61,47 @@ def api_key() -> str:
     return key
 
 
+# Hard deadline per AI call. The HTTP timeout only limits gaps between bytes, so a gateway that keeps a
+# connection open can stall far longer; this bounds every call no matter what the network does.
+MODEL_CALL_DEADLINE_SECONDS = 60
+MODEL_CALL_ATTEMPTS = 3
+
+
 @lru_cache(maxsize=1)
 def model():
+    import asyncio
+
     from openai import AsyncOpenAI
     from pydantic_ai.models.openai import OpenAIResponsesModel
+    from pydantic_ai.models.wrapper import WrapperModel
     from pydantic_ai.providers.openai import OpenAIProvider
 
+    class DeadlineModel(WrapperModel):
+        async def request(self, messages, model_settings, model_request_parameters):
+            for attempt in range(1, MODEL_CALL_ATTEMPTS + 1):
+                try:
+                    return await asyncio.wait_for(
+                        super().request(messages, model_settings, model_request_parameters),
+                        timeout=MODEL_CALL_DEADLINE_SECONDS,
+                    )
+                except asyncio.TimeoutError:
+                    if attempt == MODEL_CALL_ATTEMPTS:
+                        raise TimeoutError(
+                            f"The AI service did not answer within {MODEL_CALL_DEADLINE_SECONDS} s "
+                            f"({MODEL_CALL_ATTEMPTS} attempts)."
+                        ) from None
+
+    headers = {"x-portkey-provider": "openai"}
+    if FRESH_RESPONSES:
+        headers["x-portkey-cache-force-refresh"] = "true"
     client = AsyncOpenAI(
         api_key=api_key(),
         base_url=PORTKEY_BASE_URL,
-        default_headers={"x-portkey-provider": "openai"},
-        timeout=60,  # a healthy call takes under 20 s; fail fast and retry if the API stalls
-        max_retries=3,
+        default_headers=headers,
+        timeout=45,
+        max_retries=2,
     )
-    return OpenAIResponsesModel(MODEL_NAME, provider=OpenAIProvider(openai_client=client))
+    return DeadlineModel(OpenAIResponsesModel(MODEL_NAME, provider=OpenAIProvider(openai_client=client)))
 
 
 def cost_usd(usage: dict) -> float:
