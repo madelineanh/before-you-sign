@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import re
 import time
@@ -58,6 +59,14 @@ def _usage_table(state: CheckState) -> dict[str, Any]:
     }
 
 
+def _loggable(evidence_id: str, data: Any) -> Any:
+    """The full lease is never written to disk; log only its size and a fingerprint."""
+    if evidence_id == "LEASE":
+        return {"withheld": "lease text is not saved", "characters": len(data),
+                "sha256": hashlib.sha256(data.encode("utf-8")).hexdigest()[:16]}
+    return data
+
+
 def _write_logs(job: Job, state: CheckState | None) -> None:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     (LOG_DIR / "traces").mkdir(exist_ok=True)
@@ -71,7 +80,7 @@ def _write_logs(job: Job, state: CheckState | None) -> None:
         "safety_filters_on": SAFETY_FILTERS_ON,
         "events": job.events,
         "result": job.result,
-        "evidence": {k: {"source": e.source, "url": e.url, "data": e.data}
+        "evidence": {k: {"source": e.source, "url": e.url, "data": _loggable(k, e.data)}
                      for k, e in state.ledger.items.items()} if state else {},
     }
     (LOG_DIR / "traces" / f"{job.id}.json").write_text(json.dumps(trace, indent=2, default=str), encoding="utf-8")

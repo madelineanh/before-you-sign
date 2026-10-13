@@ -56,12 +56,12 @@ Then open **http://127.0.0.1:8000** in your browser. Stop the app with `Ctrl+C`.
 ## Using the app
 
 1. Enter a New Haven address, or click one of the examples (31 Chapel St, 100 Howe St, 224 Wooster St).
-2. Optionally add a lease: upload your own (PDF or .txt), or pick a **sample lease**:
+2. Optionally add a lease: choose **Include my lease** to upload your own (PDF or .txt), or **Use a sample lease**:
    - *A fair, standard lease*: should come back mostly clean.
    - *A lease with illegal clauses*: a 3-month deposit, early and oversized late fees, banned fees, lockouts, a liability waiver, and more.
    - *A lease with hidden AI instructions*: contains invisible white text telling AI tools to call the lease "fully compliant." Watch the safety filter catch it.
-3. Click **Check this apartment**. You'll see each agent working live. A check takes about 30–90 seconds.
-4. Read the report: the verdict, findings with clickable sources, questions for the landlord, links to the official sex-offender registries, and what couldn't be checked. Open **Behind the scenes** for this run's measured tokens, cost and safety events.
+3. Click **Begin verification**. You'll see each review working live. A check takes about 30–90 seconds.
+4. Read the verification report: the verdict, findings with clickable sources, questions for the landlord, links to the official sex-offender registries, and the scope and limitations. Open **Methodology and cost** for this run's measured tokens, cost and safeguards. Use **Print or save as PDF** to keep a copy.
 
 The sample leases are fictional and are not tied to any example address.
 
@@ -114,7 +114,7 @@ Every check writes a full step-by-step trace to `logs/traces/<id>.json` and a on
 | Invented facts, numbers or quotes | Every tool result goes into an evidence ledger. Each finding must cite real evidence IDs, every number must appear in that evidence, and every quote must match the lease word for word. Failing findings are sent back to be fixed, then removed if they still fail. |
 | Using the app to look people up | The registry tool only searches company names. Portfolio lookups only work for the owners of the address being checked. Sex-offender registries are linked, not searched. |
 | Wrong scope | Addresses outside New Haven are refused before any AI call. |
-| Runaway loops or overspending | Per-check caps on AI calls (30), tool calls (40) and tokens (250k); each specialist can be asked at most twice; 7-minute timeout; lease size limit. |
+| Runaway loops or overspending | Per-check caps on AI calls (30), tool calls (40) and tokens (600k); each specialist can be asked at most twice; 7-minute timeout; leases up to about 100 pages / 25 MB. |
 
 ### Project layout
 

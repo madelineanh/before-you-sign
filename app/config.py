@@ -38,9 +38,9 @@ STATIC_DIR = REPO_ROOT / "static"
 # Guardrails on spend and runaway loops (shared across all agents in one check).
 MAX_REQUESTS_PER_CHECK = 30
 MAX_TOOL_CALLS_PER_CHECK = 40
-MAX_TOKENS_PER_CHECK = 250_000
-MAX_LEASE_CHARS = 60_000  # roughly 20 pages of lease text
-MAX_LEASE_BYTES = 5_000_000
+MAX_TOKENS_PER_CHECK = 600_000  # a 100-page lease is ~75k tokens and is re-read on each Lease Reviewer step
+MAX_LEASE_CHARS = 300_000  # roughly 100 pages of lease text
+MAX_LEASE_BYTES = 25_000_000  # 25 MB file upload limit
 
 # Set SAFETY_FILTERS=off only to demonstrate what happens without the defenses.
 SAFETY_FILTERS_ON = os.getenv("SAFETY_FILTERS", "on").lower() != "off"
@@ -65,8 +65,8 @@ def model():
         api_key=api_key(),
         base_url=PORTKEY_BASE_URL,
         default_headers={"x-portkey-provider": "openai"},
-        timeout=120,
-        max_retries=2,
+        timeout=60,  # a healthy call takes under 20 s; fail fast and retry if the API stalls
+        max_retries=3,
     )
     return OpenAIResponsesModel(MODEL_NAME, provider=OpenAIProvider(openai_client=client))
 

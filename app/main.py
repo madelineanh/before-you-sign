@@ -67,7 +67,7 @@ async def start_check(
         if lease is not None and lease.filename:
             content = await lease.read(MAX_LEASE_BYTES + 1)
             if len(content) > MAX_LEASE_BYTES:
-                raise LeaseError("That file is larger than 5 MB.")
+                raise LeaseError(f"That file is larger than {MAX_LEASE_BYTES // 1_000_000} MB.")
             lease_text = extract_lease_text(lease.filename, content)
         elif sample_lease:
             if sample_lease not in SAMPLE_LEASES:

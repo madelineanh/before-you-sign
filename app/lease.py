@@ -34,7 +34,8 @@ def extract_lease_text(filename: str, content: bytes) -> str:
         )
     if len(text) > MAX_LEASE_CHARS:
         raise LeaseError(
-            f"That lease is too long to review ({len(text):,} characters; the limit is {MAX_LEASE_CHARS:,})."
+            f"That lease is too long to review (about {len(text) // 3000} pages; the limit is about "
+            f"{MAX_LEASE_CHARS // 3000} pages, or {MAX_LEASE_CHARS:,} characters)."
         )
     return text
 

@@ -124,8 +124,10 @@ async def run_agent(agent: Agent, name: str, prompt: str, state: CheckState, req
                 elif Agent.is_model_request_node(node):
                     for p in node.request.parts:
                         if isinstance(p, ToolReturnPart) and not p.tool_name.startswith("final_result"):
-                            state.emit("tool_result", agent=name, tool=p.tool_name,
-                                       result=_clip(p.model_response_str(), 400))
+                            # Never copy the renter's lease text into the event log.
+                            shown = ("[lease text withheld from logs]" if p.tool_name == "read_lease"
+                                     else _clip(p.model_response_str(), 400))
+                            state.emit("tool_result", agent=name, tool=p.tool_name, result=shown)
                         elif isinstance(p, RetryPromptPart):
                             state.emit("retry", agent=name, tool=p.tool_name,
                                        message=_clip(p.model_response(), 500))
@@ -519,12 +521,12 @@ Final report rules:
 - Keep the specialists' findings, merging only true duplicates (the same issue reported twice) and dropping trivial ones.
 - Never combine different red issues into one finding: every red finding stays separate so the renter can ask for each fix.
 - Include every red finding, then the most useful yellow and green ones, up to 16 findings in total, ordered red, then yellow, then green.
-- Keep each finding's evidence_ids exactly as the specialist gave them. Do not invent new facts or numbers; do not add numbers that are not in the specialists' findings.
+- Keep each finding's category and evidence_ids exactly as the specialist gave them. Do not invent new facts or numbers; do not add numbers that are not in the specialists' findings.
 - If a finding quotes the lease in double quotes, keep the quote word for word or drop the quotation marks.
 - verdict: "Serious concerns" if any red finding is about an illegal lease clause, a current owner company that is not active, or a health or safety problem at the address; "Proceed with caution" if there are other red or several yellow findings; otherwise "Looks good".
-- questions_for_landlord: the 3 to 6 most useful, specific questions.
+- questions_for_landlord: the 3 to 6 most useful, specific questions. Previous tenants' history is not in any public record, so always include one question asking how long the last tenants stayed, why the unit is available, and whether the landlord can put you in touch with a current or former tenant.
 - Problems with the check itself (a specialist failed, data unavailable) go in gaps, never in findings.
-- gaps: what could not be checked. Always remind the renter to check the official sex-offender registry links shown with this report; this tool does not search people.
+- gaps: what could not be checked. Always note that previous tenants' history and reasons for leaving are private and not in public records. Always remind the renter to check the official sex-offender registry links shown with this report; this tool does not search people.
 - Write in warm, plain English for a renter who is not a lawyer. You are not a lawyer and must not give legal advice; suggest a free legal aid resource only for red lease issues."""
 
 lead_agent = Agent(
