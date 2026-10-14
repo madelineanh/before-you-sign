@@ -294,6 +294,7 @@ function renderReport(result, jobId) {
           ${T.leaseReviewed}: <b>${result.has_lease ? T.yes : T.no}</b>
         </div>
       </div>
+      ${result.sample ? `<p class="sample-banner"><b>Sample report.</b> Saved from a real check of this address with a sample lease on ${esc(result.sample.when)}. Scroll down to try the negotiation coach, or run your own check above.</p>` : ""}
       <span class="verdict ${VERDICT_CLASS[r.verdict] || "caution"}">${esc(T.verdict[r.verdict] || r.verdict)}</span>
       <p class="headline">${esc(r.headline)}</p>
       <p class="summary">${esc(r.summary)}</p>
@@ -736,3 +737,29 @@ function renderListing(result, jobId) {
   });
   $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+
+// ------------------------------------------------------------ first-visit help
+
+async function openSample(thenCoach = false) {
+  const resp = await fetch("/api/jobs/sample");
+  if (!resp.ok) { showFormError("The sample report isn't available right now. Try running a check instead."); return; }
+  const body = await resp.json();
+  $("#progress-card").hidden = true;
+  $("#compare-result").hidden = true;
+  renderReport(body.result, "sample");
+  if (thenCoach && $("#coach")) {
+    $("#btn-practice").click();
+    setTimeout(() => $("#coach").scrollIntoView({ behavior: "smooth", block: "start" }), 400);
+  }
+}
+
+$("#see-sample").addEventListener("click", () => openSample(false));
+
+document.querySelectorAll(".feature").forEach((card) => card.addEventListener("click", () => {
+  const go = card.dataset.go;
+  if (go === "org") { location.href = "/org"; return; }
+  if (go === "coach") { openSample(true); return; }
+  document.querySelector(`.tab[data-tab="${go}"]`).click();
+  $("#form-card").scrollIntoView({ behavior: "smooth", block: "start" });
+}));

@@ -51,10 +51,36 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spac
 .secure svg { width: 14px; height: 14px; }
 
 /* ---------- hero ---------- */
-.hero { background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 76px 0 150px; }
+.hero { background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 64px 0 140px; }
 .hero h1 { font-size: 58px; line-height: 1.08; max-width: 720px; font-weight: 500; }
 .hero p.lede { font-size: 19px; color: #c5cfdc; max-width: 600px; margin: 22px 0 0; line-height: 1.6; }
 .hero .eyebrow { color: #c8a978; }
+.hero-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 28px; }
+.hero-actions span { color: #aeb9c8; font-size: 14px; }
+.hero-cta { font: inherit; font-weight: 600; font-size: 15px; color: var(--navy); background: #fff; border: 0; border-radius: 2px; padding: 14px 26px; cursor: pointer; }
+.hero-cta:hover { background: #eef2f7; }
+.features { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 30px; }
+.feature { text-align: left; font: inherit; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18); color: #fff; padding: 14px 14px 16px; border-radius: 2px; cursor: pointer; transition: background .15s, border-color .15s; }
+.feature:hover { background: rgba(255,255,255,.12); border-color: #c8a978; }
+.feature b { display: block; font-family: var(--serif); font-size: 19px; font-weight: 500; margin-bottom: 4px; }
+.feature span { display: block; font-size: 13px; color: #c5cfdc; line-height: 1.4; }
+.hero-note { color: #aeb9c8; font-size: 13.5px; margin: 16px 0 0; }
+.guide { list-style: none; margin: 0 0 22px; padding: 0 0 18px; display: flex; gap: 26px; flex-wrap: wrap; border-bottom: 1px solid var(--hairline); font-size: 14px; color: var(--slate); }
+.guide b { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; align-items: center; justify-content: center; margin-right: 6px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 26px 0 30px; }
+.stats div { border-top: 3px solid var(--brass); background: var(--paper); border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); padding: 16px 18px; }
+.stats b { display: block; font-family: var(--serif); font-size: 38px; color: var(--navy); font-weight: 500; line-height: 1.1; }
+.stats span { font-size: 14px; color: var(--slate); }
+.team-diagram { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 34px; }
+.team-diagram .node { background: var(--paper); border: 1px solid var(--navy); padding: 12px 18px; text-align: center; font-weight: 600; color: var(--navy); max-width: 620px; width: 100%; }
+.team-diagram .node span { display: block; font-weight: 400; font-size: 13px; color: var(--slate); margin-top: 2px; }
+.team-diagram .lead { background: var(--navy); color: #fff; } .team-diagram .lead span { color: #c5cfdc; }
+.team-diagram .code { background: var(--blue-soft); border-style: dashed; }
+.team-diagram .check { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+.team-diagram .specialists { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.team-diagram .specialists .node { max-width: none; }
+.team-diagram .arrow { color: var(--brass); font-size: 20px; line-height: 1; }
+.sample-banner { background: var(--amber-soft); border-left: 3px solid var(--brass); padding: 12px 16px; margin: 0 0 18px; font-size: 14.5px; }
 
 /* ---------- cards ---------- */
 main.wrap { margin-top: -96px; padding-bottom: 20px; }
@@ -233,6 +259,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
   .nav-links a { display: none; }
   .hero { padding: 48px 0 130px; }
   .hero h1 { font-size: 40px; }
+  .features, .stats, .team-diagram .specialists { grid-template-columns: 1fr; }
   .card { padding: 26px 22px; }
   .cols, .assurances { grid-template-columns: 1fr; }
   .assurances div { border-right: 0; border-bottom: 1px solid var(--hairline); }
@@ -287,12 +314,29 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
   <div class="wrap">
     <p class="eyebrow">Connecticut · all 169 towns</p>
     <h1>Know exactly what you're signing.</h1>
-    <p class="lede">An independent review of the property, its owner, and your lease, drawn from official public records and checked against Connecticut law.</p>
+    <p class="lede">A team of AI agents researches the apartment, the landlord behind it, and your lease, using official public records and Connecticut law, then writes a plain-language report in which every finding is cited.</p>
+    <div class="hero-actions">
+      <button type="button" class="hero-cta" id="see-sample">See a sample report instantly</button>
+      <span>or run your own check below · results in about 30–60 seconds</span>
+    </div>
+    <div class="features" role="list">
+      <button type="button" class="feature" data-go="single" role="listitem"><b>Verify a property</b><span>Owner, LLC, complaints, evictions, flood risk and lease law</span></button>
+      <button type="button" class="feature" data-go="compare" role="listitem"><b>Compare a shortlist</b><span>Rank 2–5 apartments on a map</span></button>
+      <button type="button" class="feature" data-go="listing" role="listitem"><b>Spot a scam listing</b><span>Paste a listing before you send money</span></button>
+      <button type="button" class="feature" data-go="coach" role="listitem"><b>Negotiate the fixes</b><span>Draft a letter or practice with an AI landlord</span></button>
+      <button type="button" class="feature" data-go="org" role="listitem"><b>For organizations</b><span>Screen up to 25 listings at once</span></button>
+    </div>
+    <p class="hero-note">All 169 Connecticut towns · reports in English, Español, Português, 中文, 한국어, Français</p>
   </div>
 </header>
 
 <main class="wrap">
   <section class="card" id="form-card">
+    <ol class="guide">
+      <li><b>1</b> Choose what to check</li>
+      <li><b>2</b> Click an example, or enter your own</li>
+      <li><b>3</b> Watch the AI agents work live, then read your cited report</li>
+    </ol>
     <div class="tabs" role="tablist">
       <button type="button" class="tab active" data-tab="single" role="tab" aria-selected="true">Verify one property</button>
       <button type="button" class="tab" data-tab="compare" role="tab" aria-selected="false">Compare a shortlist</button>
@@ -413,27 +457,33 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
 <section class="section" id="how">
   <div class="wrap">
     <p class="eyebrow">How it works</p>
-    <h2>Three independent reviews, one clear report.</h2>
+    <h2>A team of AI agents, checked by code.</h2>
+    <div class="stats">
+      <div><b>10</b><span>specialized AI agents</span></div>
+      <div><b>15</b><span>tools on public data and Connecticut law</span></div>
+      <div><b>100%</b><span>of findings cited and fact-checked in code</span></div>
+    </div>
+    <div class="team-diagram">
+      <div class="node code">Intake <span>geocode · Connecticut only · strips hidden instructions</span></div>
+      <div class="arrow">↓</div>
+      <div class="node lead">Lead Advisor <span>assigns the specialists in parallel and writes your report</span></div>
+      <div class="arrow">↓</div>
+      <div class="specialists">
+        <div class="node">Landlord Investigator <span>assessor records · statewide portfolio · CT business registry and principals</span></div>
+        <div class="node">Neighborhood Scout <span>311 reports · eviction filings · FEMA flood zone</span></div>
+        <div class="node">Lease Reviewer <span>every clause vs. 20 Connecticut statutory rules, with calculators</span></div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="node code check">Fact check (code) <span>every finding must cite real evidence; invented numbers and misquotes are rejected</span></div>
+    </div>
     <div class="cols">
-      <div class="col">
-        <svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="13" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M19 19 L26 26" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <h3>Ownership</h3>
-        <p>We identify the owner of record, the size of their Connecticut holdings, and the people registered behind any LLC.</p>
-      </div>
-      <div class="col">
-        <svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 14 L15 5 L26 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 12.5 V25 H23 V12.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        <h3>Property &amp; area</h3>
-        <p>We review the building's assessor record, service complaints at and near the address, local eviction filings, and flood risk.</p>
-      </div>
-      <div class="col">
-        <svg viewBox="0 0 30 30" aria-hidden="true"><path d="M8 3.5 H19 L24 8.5 V26.5 H8 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 15 H20 M12 19 H20 M12 23 H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <h3>Lease compliance</h3>
-        <p>Each clause is checked against Connecticut tenant law, from deposit limits and late fees to entry rights and prohibited waivers.</p>
-      </div>
+      <div class="col"><h3>Comparison Advisor</h3><p>Ranks your shortlist by a published risk score computed in code, and explains the tradeoffs.</p></div>
+      <div class="col"><h3>Listing Analyst</h3><p>Checks a pasted listing against the FTC's rental-scam warning signs and the owner of record.</p></div>
+      <div class="col"><h3>Negotiation coach</h3><p>A letter writer, a practice landlord (reasonable, busy or tough) and a coach who scores every message.</p></div>
     </div>
     <div class="assurances">
       <div><strong>Cited, not guessed</strong><span>Every finding links to the public record or statute it comes from.</span></div>
-      <div><strong>Private by design</strong><span>Your lease is read once for your review; the full text is never saved.</span></div>
+      <div><strong>Private by design</strong><span>Leases and listings are read once; the full text is never saved.</span></div>
       <div><strong>Not a people search</strong><span>We review properties and companies, not private individuals.</span></div>
     </div>
   </div>

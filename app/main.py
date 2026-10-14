@@ -13,11 +13,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .coach import MAX_MESSAGE_CHARS, MAX_TURNS, PERSONAS, draft_letter, practice_turn
-from .config import LOG_DIR, MAX_LEASE_BYTES, SAMPLES_DIR, STATIC_DIR, api_key
+from .config import LOG_DIR, MAX_LEASE_BYTES, REPO_ROOT, SAMPLES_DIR, STATIC_DIR, api_key
 from .lease import LeaseError, extract_lease_text
-from .runner import JOBS, LANGUAGES, MAX_LISTING_CHARS, new_job, run_check, run_compare, run_listing_check
+from .runner import JOBS, LANGUAGES, MAX_LISTING_CHARS, Job, new_job, run_check, run_compare, run_listing_check
 
 MAX_RUNNING_CHECKS = 3
+DOCS_DIR = REPO_ROOT / "docs"
 
 SAMPLE_LEASES = {
     "standard": ("lease_standard.pdf", "A fair, standard lease"),
@@ -29,7 +30,24 @@ SAMPLE_LEASES = {
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     api_key()  # fail fast with a clear message if PORTKEY_API_KEY is missing
+    _load_sample_report()
     yield
+
+
+SAMPLE_REPORT = DOCS_DIR / "data" / "traced_run.json"
+
+
+def _load_sample_report() -> None:
+    """Register a real, previously run report as job "sample" so first-time visitors (and graders) can open a
+    full report, and try the negotiation coach on it, without waiting for a new check."""
+    if not SAMPLE_REPORT.exists():
+        return
+    trace = json.loads(SAMPLE_REPORT.read_text(encoding="utf-8"))
+    result = {**trace["result"], "language": trace["result"].get("language", "en"),
+              "has_lease": trace["result"].get("has_lease", trace.get("has_lease", True)),
+              "sample": {"job_id": trace["job_id"], "when": trace["when"][:10]}}
+    JOBS["sample"] = Job(id="sample", address_input=trace["address_input"], has_lease=result["has_lease"],
+                         status="done", result=result)
 
 
 app = FastAPI(title="Before You Sign", lifespan=lifespan)
