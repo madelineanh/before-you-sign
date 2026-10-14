@@ -249,10 +249,19 @@ function groupedSources(evidence, T) {
   return out;
 }
 
+// "Conn. Gen. Stat. § 47a-15a(a): Grace period" -> "§ 47a-15a(a) · Grace period"
+function shortLaw(source) {
+  const [cite, topic] = source.split(": ");
+  return `${cite.replace("Conn. Gen. Stat. ", "")}${topic ? ` · ${topic}` : ""}`;
+}
+
 function findingsHtml(findings, evidence, T) {
   return findings.map((f) => {
     const seen = new Set();
-    const srcs = f.evidence_ids.filter((id) => {
+    const lawIds = f.evidence_ids.filter((id) => id.startsWith("CT-") && evidence[id]);
+    const law = lawIds.map((id) => `<a href="${esc(evidence[id].url)}" target="_blank" rel="noopener"
+      title="${esc(evidence[id].source)}">${esc(shortLaw(evidence[id].source))}</a>`).join("");
+    const srcs = f.evidence_ids.filter((id) => !id.startsWith("CT-")).filter((id) => {
       const label = evidence[id] ? evidence[id].source : id;  // show each source once
       if (seen.has(label)) return false;
       seen.add(label);
@@ -261,7 +270,7 @@ function findingsHtml(findings, evidence, T) {
       const e = evidence[id];
       if (!e) return `<span>${esc(id)}</span>`;
       const label = id === "LEASE" ? T.yourLease : id === "LISTING" ? T.category.listing
-        : e.source.replace(/ principals for business \w+$/, " principals");
+        : e.source.replace(/ principals for business \w+$/, " principals").replace(/\s*\(Conn\. Gen\. Stat\..*\)$/, "");
       return e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" title="${esc(id)}">${esc(label)}</a>`
                    : `<span title="${esc(id)}">${esc(label)}</span>`;
     }).join("");
@@ -274,6 +283,7 @@ function findingsHtml(findings, evidence, T) {
         <h3>${esc(stripIds(f.title))}</h3>
         <p>${esc(stripIds(f.detail))}</p>
         <div class="sources">${T.sources} ${srcs}</div>
+        ${law ? `<div class="law"><span>${esc(T.lawLabel)}:</span> ${law}</div>` : ""}
       </div>
     </article>`;
   }).join("");
@@ -634,10 +644,11 @@ function setupCoach(result, jobId, T) {
           <ol class="letter-items">${body.items.map((i) => `<li>
             <b>${esc(i.topic)}</b>
             <p>${esc(stripIds(i.request))}</p>
-            ${i.statute ? `<span class="cite">${esc(i.statute)}</span>` : ""}</li>`).join("")}</ol>
+            ${i.statute ? `<span class="cite">${esc(T.legalBasis)}: ${esc(i.statute)}</span>` : ""}</li>`).join("")}</ol>
           <p>${esc(body.closing)}</p>
           <p class="sign">${esc(body.sign_off)}<br>[Your name]</p>
         </div>
+        <p class="cite-note">${esc(T.citeNote)}</p>
         <button class="secondary" id="btn-copy">${esc(C.copy)}</button></div>`;
       $("#btn-copy").addEventListener("click", async () => {
         await navigator.clipboard.writeText(body.plain_text);
@@ -772,7 +783,7 @@ async function openSample(thenCoach = false) {
   renderReport(body.result, "sample", { scroll: !thenCoach });
   if (thenCoach && $("#coach")) {
     $("#btn-practice").click();
-    setTimeout(() => $("#coach").scrollIntoView({ behavior: scrollMode(), block: "start" }), 50);
+    setTimeout(scrollToCoach, 50);
   }
 }
 
@@ -792,7 +803,7 @@ document.querySelectorAll("[data-go]").forEach((el) => el.addEventListener("clic
     // Use the report on screen if there is one with a coach; otherwise open the sample report's coach.
     if ($("#coach") && !$("#report").hidden) {
       $("#btn-practice").click();
-      $("#coach").scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollToCoach();
     } else {
       openSample(true);
     }
@@ -822,6 +833,15 @@ function sectionNav(items) {
 
 // Smooth scrolling only runs in a visible tab; jump instantly otherwise so the target is still reached.
 const scrollMode = () => (document.visibilityState === "visible" ? "smooth" : "auto");
+
+// Scroll to the coach, then make sure we actually landed there (a long page can still be laying out).
+function scrollToCoach() {
+  $("#coach").scrollIntoView({ behavior: scrollMode(), block: "start" });
+  setTimeout(() => {
+    const top = $("#coach").getBoundingClientRect().top;
+    if (Math.abs(top - 120) > 40) $("#coach").scrollIntoView({ behavior: "auto", block: "start" });
+  }, 900);
+}
 
 let sectionObserver = null;
 function watchSections(container) {

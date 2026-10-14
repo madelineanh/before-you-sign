@@ -143,7 +143,13 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--navy
 .letter-items li::before { content: counter(req); position: absolute; left: 0; top: 15px; width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
 .letter-items b { display: block; font-size: 15.5px; color: var(--navy); }
 .letter-items p { margin: 2px 0 6px; }
-.letter-items .cite { display: inline-block; font-size: 12.5px; background: var(--blue-soft); color: var(--slate); padding: 2px 9px; border-radius: 2px; }
+.letter-items .cite { display: block; font-size: 11.5px; color: #8a929e; letter-spacing: .01em; }
+.cite-note { font-size: 12px; color: #8a929e; margin: -4px 0 14px; }
+.law { font-size: 12px; color: #8a929e; margin-top: 4px; }
+.law span { font-weight: 600; letter-spacing: .04em; }
+.law a { display: inline-block; color: #8a929e; text-decoration: none; border-bottom: 1px dotted #b9c0ca; margin: 0 10px 2px 0; }
+.finding > div { min-width: 0; }
+.law a:hover { color: var(--navy); }
 .letter-paper .sign { margin: 0; }
 @media (max-width: 760px) { .letter-paper { padding: 22px 20px; } }
 .personas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -331,7 +337,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
       <button type="button" data-go="single" class="fb-active">Verify a property</button>
       <button type="button" data-go="compare">Compare a shortlist</button>
       <button type="button" data-go="listing">Scam check</button>
-      <button type="button" data-go="coach">Negotiation coach</button>
+      <button type="button" data-go="coach">AI negotiation coach</button>
       <button type="button" data-go="org">For organizations</button>
     </div>
     <button type="button" class="fb-sample" data-go="sample">Sample report</button>
@@ -351,7 +357,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
       <button type="button" class="feature" data-go="single" role="listitem"><b>Verify a property</b><span>Owner, LLC, complaints, evictions, flood risk and lease law</span></button>
       <button type="button" class="feature" data-go="compare" role="listitem"><b>Compare a shortlist</b><span>Rank 2–5 apartments on a map</span></button>
       <button type="button" class="feature" data-go="listing" role="listitem"><b>Spot a scam listing</b><span>Paste a listing before you send money</span></button>
-      <button type="button" class="feature" data-go="coach" role="listitem"><b>Negotiate the fixes</b><span>Draft a letter or practice with an AI landlord</span></button>
+      <button type="button" class="feature" data-go="coach" role="listitem"><b>AI negotiation coach</b><span>AI drafts your letter to the landlord; rehearse with an AI landlord</span></button>
       <button type="button" class="feature" data-go="org" role="listitem"><b>For organizations</b><span>Screen up to 25 listings at once</span></button>
     </div>
     <p class="hero-note">All 169 Connecticut towns · reports in English, Español, Português, 中文, 한국어, Français</p>
