@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-Category = Literal["landlord", "building", "neighborhood", "lease"]
+Category = Literal["landlord", "building", "neighborhood", "lease", "listing"]
 Severity = Literal["red", "yellow", "green"]
 
 
@@ -32,3 +32,27 @@ class FinalReport(BaseModel):
     findings: list[Finding]
     questions_for_landlord: list[str]
     gaps: list[str] = Field(default_factory=list)
+
+
+class RankedApartment(BaseModel):
+    label: str = Field(description="The apartment's letter label, e.g. A")
+    rank: int = Field(description="1 = best choice")
+    summary: str = Field(description="One sentence on why it ranks here")
+    strengths: list[str] = Field(default_factory=list)
+    concerns: list[str] = Field(default_factory=list)
+
+
+class Comparison(BaseModel):
+    ranking: list[RankedApartment]
+    recommendation: str = Field(description="Two to four sentences: which to pursue first and what to confirm")
+    tradeoffs: str = Field(description="Two to four sentences on the key tradeoffs between the top options")
+
+
+class ListingReport(BaseModel):
+    risk: Literal["Low", "Elevated", "High"] = Field(description="Scam risk of this listing")
+    headline: str = Field(description="One sentence bottom line")
+    summary: str = Field(description="A short paragraph explaining the risk")
+    findings: list[Finding] = Field(description="Red flags (red/yellow) and verified facts (green), each citing evidence")
+    next_steps: list[str] = Field(description="3 to 6 concrete steps before sending any money")
+    extracted_address: str | None = Field(default=None, description="The property address stated in the listing, if any")
+    extracted_rent_usd: float | None = None

@@ -11,6 +11,7 @@ goes through the same code-level fact check before it is accepted.
 
 from __future__ import annotations
 
+import json
 import time
 from dataclasses import dataclass, field
 from typing import Any, Callable
@@ -22,8 +23,8 @@ from . import sources
 from .config import (MAX_REQUESTS_PER_CHECK, MAX_TOKENS_PER_CHECK, MAX_TOOL_CALLS_PER_CHECK, REASONING_EFFORT,
                      model)
 from .lease import ct_law, ct_law_for_prompt
-from .models import FinalReport, SpecialistReport
-from .safety import Ledger, check_finding, filter_untrusted
+from .models import Comparison, FinalReport, SpecialistReport
+from .safety import Ledger, _numbers, check_finding, filter_untrusted
 
 Emit = Callable[..., None]
 
@@ -126,7 +127,7 @@ async def run_agent(agent: Agent, name: str, prompt: str, state: CheckState, req
                     for p in node.request.parts:
                         if isinstance(p, ToolReturnPart) and not p.tool_name.startswith("final_result"):
                             # Never copy the renter's lease text into the event log.
-                            shown = ("[lease text withheld from logs]" if p.tool_name == "read_lease"
+                            shown = ("[text withheld from logs]" if p.tool_name in ("read_lease", "read_listing")
                                      else _clip(p.model_response_str(), 400))
                             state.emit("tool_result", agent=name, tool=p.tool_name, result=shown)
                         elif isinstance(p, RetryPromptPart):
@@ -182,13 +183,13 @@ def _source_error(state: CheckState, what: str, exc: Exception) -> dict[str, str
 
 # ===================================================== Landlord Investigator
 
-LANDLORD_PROMPT = """You are the Landlord Investigator for "Before You Sign", a tool that helps renters in New Haven, Connecticut check an apartment before signing a lease.
+LANDLORD_PROMPT = """You are the Landlord Investigator for "Before You Sign", a tool that helps renters anywhere in Connecticut check an apartment before signing a lease.
 
 Your job: find out who really owns the building and what kind of landlord they are, using ONLY your tools.
 
 How to work:
 1. Call get_property_records first.
-2. For each owner, call get_owner_portfolio to see how many New Haven properties they hold.
+2. For each owner, call get_owner_portfolio to see how many Connecticut properties they hold, and in which towns.
 3. If an owner is a company (LLC, Inc., trust, etc.), call search_business_registry with that exact company name, then get_company_principals with the business_id to find the people or companies behind it. If a principal is itself a company, you may look that company up too.
 4. Then write your report.
 
@@ -220,27 +221,27 @@ def _landlord_valid(ctx: RunContext[CheckState], output: SpecialistReport) -> Sp
 
 @landlord_agent.tool
 async def get_property_records(ctx: RunContext[CheckState]) -> dict[str, Any]:
-    """New Haven assessor records (owner, owner mailing address, use, year built, condition, assessed value, last sales) for the renter's address."""
+    """The town assessor's records (owner, owner mailing address, use, year built, condition, assessed value, last sales) for the renter's address."""
     s = ctx.deps
     a = s.address
     try:
-        parcels = await sources.find_parcels(a["street_number"], a["street_name"])
+        parcels = await sources.find_parcels_for(a)
     except sources.SourceError as exc:
         return _source_error(s, "The CT parcel database", exc)
     if not parcels:
-        s.gaps.append(f"No assessor record matched {a['street_number']} {a['street_name']}.")
+        s.gaps.append(f"No {a['town']} assessor record matched {a['street_number']} {a['street_name']}.")
         return {"result": "No assessor record found for this address."}
     for p in parcels:
         for who in (p.get("owner"), p.get("co_owner")):
             if who:
                 s.known_owners.add(who.upper())
-    eid = s.ledger.add("CT Parcel and CAMA Data 2025 (New Haven assessor)", parcels, sources.SOURCE_PAGES["parcels"])
+    eid = s.ledger.add(f"CT Parcel and CAMA Data 2025 ({a['town']} assessor)", parcels, sources.SOURCE_PAGES["parcels"])
     return {"evidence_id": eid, "parcels": parcels}
 
 
 @landlord_agent.tool
 async def get_owner_portfolio(ctx: RunContext[CheckState], owner_name: str) -> dict[str, Any]:
-    """Count every New Haven property held under this exact owner name. Only works for owners returned by get_property_records."""
+    """Count every Connecticut property held under this exact owner name, by town. Only works for owners returned by get_property_records."""
     s = ctx.deps
     if owner_name.upper() not in s.known_owners:
         s.safety("scope_block", LANDLORD,
@@ -250,7 +251,7 @@ async def get_owner_portfolio(ctx: RunContext[CheckState], owner_name: str) -> d
         data = await sources.owner_portfolio(owner_name)
     except sources.SourceError as exc:
         return _source_error(s, "The CT parcel database", exc)
-    eid = s.ledger.add(f"CT Parcel Data: all New Haven parcels owned by {owner_name}", data, sources.SOURCE_PAGES["parcels"])
+    eid = s.ledger.add(f"CT Parcel Data: all Connecticut parcels owned by {owner_name}", data, sources.SOURCE_PAGES["parcels"])
     return {"evidence_id": eid, **data}
 
 
@@ -293,7 +294,7 @@ async def get_company_principals(ctx: RunContext[CheckState], business_id: str) 
 
 # ======================================================== Neighborhood Scout
 
-NEIGHBORHOOD_PROMPT = """You are the Neighborhood Scout for "Before You Sign", a tool that helps renters in New Haven, Connecticut check an apartment before signing a lease.
+NEIGHBORHOOD_PROMPT = """You are the Neighborhood Scout for "Before You Sign", a tool that helps renters anywhere in Connecticut check an apartment before signing a lease.
 
 Your job: describe the building's surroundings using ONLY your tools. Call get_311_reports, get_eviction_filings and get_flood_zone (you can call them all at once), then write your report.
 
@@ -301,6 +302,7 @@ What matters to a renter:
 - 311 reports AT the address itself (especially health, housing, private-property, rodent, heat or trash problems) matter most.
 - Patterns nearby: many illegal-dumping, health or private-property reports suggest ongoing problems. Routine items like potholes or parking are minor; mention them only briefly if at all.
 - Eviction filings in the census tract compared with other tracts in the county (filings, not completed evictions, and not adjusted for the number of renters). Tract-level data describes the area, not this landlord, so it is never "red": use yellow if well above the county median, otherwise green.
+- If get_311_reports returns 0 reports, the town may not use SeeClickFix: say 311 data was unavailable (in "gaps"), not that the area has no problems.
 - FEMA flood zone: anything starting with A or V is high risk and renters should ask about flooding and consider renter's insurance with flood coverage.
 
 Rules:
@@ -324,13 +326,13 @@ def _neighborhood_valid(ctx: RunContext[CheckState], output: SpecialistReport) -
 
 @neighborhood_agent.tool
 async def get_311_reports(ctx: RunContext[CheckState]) -> dict[str, Any]:
-    """New Haven 311 (SeeClickFix) reports within about 150 meters of the address over the last 24 months."""
+    """311 (SeeClickFix) reports within about 150 meters of the address over the last 24 months. Many, but not all, Connecticut towns use SeeClickFix."""
     s = ctx.deps
     a = s.address
     try:
         data = await sources.nearby_311(a["lat"], a["lng"], a["street_number"], a["street_name"])
     except sources.SourceError as exc:
-        return _source_error(s, "New Haven 311 (SeeClickFix)", exc)
+        return _source_error(s, "311 reports (SeeClickFix)", exc)
     flagged = 0
     for key in ("reports_at_this_address", "nearby_housing_or_health_reports"):
         for item in data[key]:
@@ -341,13 +343,13 @@ async def get_311_reports(ctx: RunContext[CheckState]) -> dict[str, Any]:
     if flagged:
         s.safety("injection_filtered", NEIGHBORHOOD,
                  f"Removed AI-directed instructions from {flagged} resident-written 311 description(s).")
-    eid = s.ledger.add("New Haven 311 reports (SeeClickFix)", data, sources.SOURCE_PAGES["seeclickfix"])
+    eid = s.ledger.add("311 reports (SeeClickFix)", data, sources.SOURCE_PAGES["seeclickfix"])
     return {"evidence_id": eid, **data}
 
 
 @neighborhood_agent.tool
 async def get_eviction_filings(ctx: RunContext[CheckState]) -> dict[str, Any]:
-    """Eviction filings in the address's census tract over the latest 52 weeks, compared with every tract in New Haven County (Eviction Lab data)."""
+    """Eviction filings in the address's census tract over the latest 52 weeks, compared with every tract in the same county (Eviction Lab data)."""
     s = ctx.deps
     tract = s.address.get("tract_geoid")
     if not tract:
@@ -375,7 +377,7 @@ async def get_flood_zone(ctx: RunContext[CheckState]) -> dict[str, Any]:
 
 # ============================================================ Lease Reviewer
 
-LEASE_PROMPT = """You are the Lease Reviewer for "Before You Sign", a tool that helps renters in New Haven, Connecticut check a lease before signing it.
+LEASE_PROMPT = """You are the Lease Reviewer for "Before You Sign", a tool that helps renters in Connecticut check a lease before signing it.
 
 Your job: read the renter's lease with read_lease, find clauses that break Connecticut law or are unusual and risky for the tenant, and explain them in plain English.
 
@@ -506,7 +508,7 @@ async def check_upfront_fees(ctx: RunContext[CheckState], fee_name: str, fee_usd
 
 # ============================================================== Lead Advisor
 
-LEAD_PROMPT = """You are the Lead Advisor for "Before You Sign", a tool that helps renters in New Haven, Connecticut decide whether an apartment and lease are safe to sign.
+LEAD_PROMPT = """You are the Lead Advisor for "Before You Sign", a tool that helps renters in Connecticut decide whether an apartment and lease are safe to sign.
 
 You manage three specialists, each available as a tool:
 - ask_landlord_investigator: who owns the building, their portfolio, the companies and people behind it
@@ -527,8 +529,14 @@ Final report rules:
 - verdict: "Serious concerns" if any red finding is about an illegal lease clause, a current owner company that is not active, or a health or safety problem at the address; "Proceed with caution" if there are other red or several yellow findings; otherwise "Looks good".
 - questions_for_landlord: the 3 to 6 most useful, specific questions. Previous tenants' history is not in any public record, so always include one question asking how long the last tenants stayed, why the unit is available, and whether the landlord can put you in touch with a current or former tenant.
 - Problems with the check itself (a specialist failed, data unavailable) go in gaps, never in findings.
-- gaps: what could not be checked. Always note that previous tenants' history and reasons for leaving are private and not in public records. Always remind the renter to check the official sex-offender registry links shown with this report; this tool does not search people.
-- Write in warm, plain English for a renter who is not a lawyer. You are not a lawyer and must not give legal advice; suggest a free legal aid resource only for red lease issues."""
+- gaps: what could not be checked. Always note that previous tenants' history and reasons for leaving are private and not in public records. Always remind the renter to use the official sex-offender registry links that the app displays with every report (the app adds them automatically; you do not need a tool for them); this tool does not search people.
+- Write in warm, plain language for a renter who is not a lawyer. You are not a lawyer and must not give legal advice; suggest a free legal aid resource only for red lease issues.
+
+Language:
+- Write headline, summary, every finding's title and detail, the questions and the gaps in the REPORT LANGUAGE named in the request, using that language's everyday words (for example "contrato de arrendamiento", not "lease", in Spanish). The specialists report in English; translate their findings faithfully without adding or dropping facts.
+- Keep these exactly as they appear in the evidence, untranslated: quotations from the lease (in double quotes), statute citations such as "Conn. Gen. Stat. § 47a-21(b)", company and person names, street addresses, and evidence IDs.
+- Write every number with the same digits as the evidence, and dollar amounts in U.S. style ($1,800 or $5,400), never 1.800, 1 800 or 1800,00.
+- The verdict field always uses one of its three English values."""
 
 lead_agent = Agent(
     deps_type=CheckState, output_type=FinalReport, name="lead_advisor",
@@ -584,3 +592,96 @@ async def ask_lease_reviewer(ctx: RunContext[CheckState], task: str) -> dict[str
         return {"error": "No lease was uploaded for this check."}
     _add_law_to_ledger(ctx.deps)
     return await _ask(ctx, lease_agent, LEASE, task)
+
+
+# ======================================================== Comparison Advisor
+
+COMPARE_PROMPT = """You are the Comparison Advisor for "Before You Sign". A renter is choosing between several Connecticut apartments.
+Each apartment has a letter label, an address, an optional monthly rent the renter entered, and a finished verification report
+(verdict, headline and findings) written by other agents from public records.
+
+The ranking is FIXED by a transparent score computed in code (shown as "rank" and "risk_points" for each apartment:
+10 points for a "Serious concerns" verdict, 3 for "Proceed with caution", plus 3 per red finding and 1 per yellow
+finding; ties go to the lower rent). Use exactly those ranks. Your job is to EXPLAIN the ranking to the renter:
+for each apartment, a one-sentence summary of why it lands where it does, its main strengths and concerns, then an
+overall recommendation and the key tradeoffs (for example, when a cheaper apartment carries more risk).
+
+Rules:
+- Use ONLY facts in the reports and the rents provided. Never invent facts.
+- Every number you write must appear in the reports or rents exactly (dollar amounts in U.S. style such as $1,800).
+- Refer to apartments by label and address. Give every apartment exactly one rank; ranks are 1..N with no ties.
+- Write in the REPORT LANGUAGE named in the request, keeping addresses, company names and numbers unchanged.
+- You are not a lawyer and do not tell the renter to sign or not sign; say what to pursue first and what to confirm."""
+
+
+@dataclass
+class CompareState:
+    labels: list[str]
+    context_text: str
+    ranks: dict[str, int] = field(default_factory=dict)
+    usage: dict[str, int] = field(default_factory=dict)
+    safety_events: list[dict[str, Any]] = field(default_factory=list)
+
+
+compare_agent = Agent(
+    deps_type=CompareState, output_type=Comparison, name="comparison_advisor",
+    instructions=COMPARE_PROMPT, model_settings=_settings("compare"), retries=2,
+)
+
+
+@compare_agent.output_validator
+def _compare_valid(ctx: RunContext[CompareState], output: Comparison) -> Comparison:
+    st = ctx.deps
+    problems: list[str] = []
+    labels = [r.label for r in output.ranking]
+    if sorted(labels) != sorted(st.labels):
+        problems.append(f"Rank every apartment exactly once. Expected labels {st.labels}, got {labels}.")
+    wrong = [r.label for r in output.ranking if st.ranks.get(r.label) != r.rank]
+    if wrong:
+        problems.append(f"Use the fixed ranks exactly: {st.ranks}. Wrong for {wrong}.")
+    claims = " ".join([output.recommendation, output.tradeoffs] +
+                      [" ".join([r.summary, *r.strengths, *r.concerns]) for r in output.ranking])
+    supported = _numbers(st.context_text) | {"311"} | {str(i) for i in range(1, 10)}
+    unsupported = sorted(n for n in _numbers(claims) if len(n.replace(".", "")) >= 2 and n not in supported)
+    if unsupported:
+        problems.append(f"These numbers do not appear in the reports or rents: {unsupported}. Use only numbers from the input.")
+    if problems and ctx.retry < ctx.max_retries:
+        st.safety_events.append({"type": "fact_check_retry", "agent": "Comparison Advisor",
+                                 "detail": f"Sent the comparison back for correction ({len(problems)} problem(s))",
+                                 "problems": problems})
+        raise ModelRetry("Fix these problems and return the full comparison again:\n- " + "\n- ".join(problems))
+    if problems:
+        raise ValueError("The comparison could not be verified against the reports: " + " ".join(problems))
+    output.ranking.sort(key=lambda r: r.rank)
+    return output
+
+
+VERDICT_POINTS = {"Serious concerns": 10, "Proceed with caution": 3, "Looks good": 0}
+
+
+def risk_points(report: dict[str, Any]) -> int:
+    f = report["findings"]
+    return (VERDICT_POINTS.get(report["verdict"], 3) + 3 * sum(x["severity"] == "red" for x in f)
+            + sum(x["severity"] == "yellow" for x in f))
+
+
+async def run_comparison(apartments: list[dict[str, Any]], language_name: str) -> tuple[Comparison, CompareState]:
+    """apartments: [{label, address, rent, report}] -> ranking fixed by code, explained by the agent."""
+    order = sorted(apartments, key=lambda a: (risk_points(a["report"]), a.get("rent") or float("inf"), a["label"]))
+    ranks = {a["label"]: i + 1 for i, a in enumerate(order)}
+    payload = [{"label": a["label"], "rank": ranks[a["label"]], "risk_points": risk_points(a["report"]),
+                "address": a["address"], "monthly_rent_usd": a.get("rent"),
+                "verdict": a["report"]["verdict"], "headline": a["report"]["headline"],
+                "findings": [{"severity": f["severity"], "category": f["category"], "title": f["title"], "detail": f["detail"]}
+                             for f in a["report"]["findings"]]}
+               for a in apartments]
+    context = json.dumps(payload, ensure_ascii=False)
+    state = CompareState(labels=[a["label"] for a in apartments], context_text=context, ranks=ranks)
+    prompt = f"REPORT LANGUAGE: {language_name}\nApartments:\n{context}"
+    result = await compare_agent.run(prompt, deps=state, model=model(),
+                                     usage_limits=UsageLimits(request_limit=4, total_tokens_limit=120_000))
+    u = result.usage
+    state.usage = {"requests": u.requests, "tool_calls": 0, "input_tokens": u.input_tokens or 0,
+                   "cache_read_tokens": u.cache_read_tokens or 0, "cache_write_tokens": u.cache_write_tokens or 0,
+                   "output_tokens": u.output_tokens or 0}
+    return result.output, state

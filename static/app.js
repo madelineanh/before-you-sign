@@ -13,6 +13,7 @@ const DISPLAY = {
   "Neighborhood Scout": "Property & Area Records",
   "Lease Reviewer": "Lease Compliance",
   "Intake": "Intake",
+  "Listing Analyst": "Listing Analyst",
 };
 const shown = (agent) => DISPLAY[agent] || agent;
 
@@ -20,8 +21,8 @@ const TOOL_WORDS = {
   ask_landlord_investigator: "opened the ownership review",
   ask_neighborhood_scout: "opened the property and area review",
   ask_lease_reviewer: "opened the lease compliance review",
-  get_property_records: "pulled the New Haven assessor records",
-  get_owner_portfolio: "counted the owner's New Haven properties",
+  get_property_records: "pulled the town assessor records",
+  get_owner_portfolio: "counted the owner's Connecticut properties",
   search_business_registry: "searched the Connecticut business registry",
   get_company_principals: "looked up the people behind the company",
   get_311_reports: "pulled nearby 311 reports",
@@ -31,6 +32,10 @@ const TOOL_WORDS = {
   check_security_deposit: "checked the security deposit against CT law",
   check_late_fee: "checked the late fee against CT law",
   check_upfront_fees: "checked an up-front fee against CT law",
+  read_listing: "read the listing",
+  scan_scam_patterns: "scanned for rental-scam warning signs",
+  lookup_property: "looked up the owner of record",
+  compare_names: "compared the listing's name with the owner of record",
 };
 
 // ------------------------------------------------------------------ form
@@ -66,6 +71,7 @@ $("#check-form").addEventListener("submit", async (e) => {
   const mode = document.querySelector('input[name="lease_mode"]:checked').value;
   const data = new FormData();
   data.append("address", $("#address").value.trim());
+  data.append("language", $("#language").value);
   if (mode === "upload") {
     const file = $("#lease-file").files[0];
     if (!file) { showFormError("Please choose your lease file, or pick “No lease yet”."); return; }
@@ -97,12 +103,19 @@ function showFormError(msg) {
 function resetButton() {
   $("#submit").disabled = false;
   $("#submit").textContent = "Begin verification";
+  $("#compare-submit").disabled = false;
+  $("#compare-submit").textContent = "Compare apartments";
+  $("#listing-submit").disabled = false;
+  $("#listing-submit").textContent = "Check this listing";
 }
 
 // -------------------------------------------------------------- progress
 
 function startProgress(hasLease) {
   $("#report").hidden = true;
+  $("#compare-result").hidden = true;
+  $("#team").hidden = false;
+  $("#compare-team").hidden = true;
   $("#progress-card").hidden = false;
   $("#activity").innerHTML = "";
   $("#progress-status").textContent = "Getting started…";
@@ -159,6 +172,15 @@ function handleEvent(ev) {
     case "safety":
       addActivity(`<b>Safeguard:</b> ${esc(ev.detail)}`, "safety");
       break;
+    case "sub_started":
+      setCompareRow(ev.label, "working", "In progress");
+      addActivity(`<b>Apartment ${esc(ev.label)}</b> verification started: ${esc(ev.address)}`);
+      break;
+    case "sub_done":
+      setCompareRow(ev.label, "done", ev.status === "done" ? (ev.verdict || "Complete") : "Could not check");
+      addActivity(`<b>Apartment ${esc(ev.label)}</b> ${ev.status === "done" ? `finished: ${esc(ev.verdict)}` : `could not be checked: ${esc(ev.error || "")}`}`,
+                  ev.status === "done" ? "" : "safety");
+      break;
   }
 }
 
@@ -176,7 +198,9 @@ async function poll(jobId, since) {
     resetButton();
     if (body.status === "done") {
       $("#progress-status").textContent = `Completed in ${body.result.seconds} seconds`;
-      renderReport(body.result, jobId);
+      if (body.result.mode === "compare") renderCompare(body.result, jobId);
+      else if (body.result.mode === "listing") renderListing(body.result, jobId);
+      else renderReport(body.result, jobId);
     } else {
       $("#progress-status").textContent = "Verification stopped";
       // If no agent ever started (e.g. the address was refused), the team list is just noise.
@@ -192,8 +216,6 @@ async function poll(jobId, since) {
 // ---------------------------------------------------------------- report
 
 const VERDICT_CLASS = { "Looks good": "good", "Proceed with caution": "caution", "Serious concerns": "serious" };
-const SEVERITY_WORD = { red: "Material concern", yellow: "Clarify before signing", green: "Satisfactory" };
-const CATEGORY_WORD = { landlord: "Ownership", building: "Property", neighborhood: "Area", lease: "Lease" };
 const ORDER = { red: 0, yellow: 1, green: 2 };
 
 // "224 WOOSTER ST, NEW HAVEN, CT, 06511" -> "224 Wooster St, New Haven, CT 06511"
@@ -213,12 +235,8 @@ function stripIds(text) {
 function money(x) { return `$${Number(x).toFixed(4)}`; }
 function n(x) { return Number(x || 0).toLocaleString(); }
 
-function renderReport(result, jobId) {
-  const r = result.report;
-  const evidence = Object.fromEntries((result.evidence || []).map((e) => [e.id, e]));
-  const findings = [...r.findings].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
-
-  const findingHtml = findings.map((f) => {
+function findingsHtml(findings, evidence, T) {
+  return findings.map((f) => {
     const seen = new Set();
     const srcs = f.evidence_ids.filter((id) => {
       const label = evidence[id] ? evidence[id].source : id;  // show each source once
@@ -228,22 +246,31 @@ function renderReport(result, jobId) {
     }).map((id) => {
       const e = evidence[id];
       if (!e) return `<span>${esc(id)}</span>`;
-      const label = id === "LEASE" ? "Your lease" : e.source;
+      const label = id === "LEASE" ? T.yourLease : id === "LISTING" ? T.category.listing : e.source;
       return e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" title="${esc(id)}">${esc(label)}</a>`
                    : `<span title="${esc(id)}">${esc(label)}</span>`;
     }).join("");
     return `<article class="finding ${esc(f.severity)}">
       <div class="label">
-        <span class="tag ${esc(f.severity)}">${SEVERITY_WORD[f.severity] || esc(f.severity)}</span><br>
-        <span class="tag cat">${CATEGORY_WORD[f.category] || esc(f.category)}</span>
+        <span class="tag ${esc(f.severity)}">${T.severity[f.severity] || esc(f.severity)}</span><br>
+        <span class="tag cat">${T.category[f.category] || esc(f.category)}</span>
       </div>
       <div>
         <h3>${esc(stripIds(f.title))}</h3>
         <p>${esc(stripIds(f.detail))}</p>
-        <div class="sources">Sources: ${srcs}</div>
+        <div class="sources">${T.sources} ${srcs}</div>
       </div>
     </article>`;
   }).join("");
+}
+
+function renderReport(result, jobId) {
+  const T = I18N[result.language] || I18N.en;
+  const r = result.report;
+  const evidence = Object.fromEntries((result.evidence || []).map((e) => [e.id, e]));
+  const findings = [...r.findings].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
+
+  const findingHtml = findingsHtml(findings, evidence, T);
 
   const gaps = [...(r.gaps || [])];
   const safety = result.safety_events || [];
@@ -252,50 +279,51 @@ function renderReport(result, jobId) {
       <td>${n(a.cache_read_tokens)}</td><td>${n(a.output_tokens)}</td><td>${money(a.cost_usd)}</td></tr>`).join("");
   const t = u.totals;
 
-  const when = new Date().toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" });
+  const when = new Date().toLocaleString(T.locale, { dateStyle: "long", timeStyle: "short" });
 
   $("#report").innerHTML = `
     <section class="card">
       <div class="report-head">
         <div>
-          <p class="eyebrow">Verification report</p>
+          <p class="eyebrow">${T.eyebrow}</p>
           <div class="report-address">${esc(prettyAddress(result.address.matched_address))}</div>
         </div>
         <div class="report-meta">
-          Report no. <b>${esc(String(jobId).toUpperCase())}</b><br>
-          Issued <b>${esc(when)}</b><br>
-          Lease reviewed: <b>${r.findings.some((f) => f.category === "lease") ? "Yes" : "No"}</b>
+          ${T.reportNo} <b>${esc(String(jobId).toUpperCase())}</b><br>
+          ${T.issued} <b>${esc(when)}</b><br>
+          ${T.leaseReviewed}: <b>${result.has_lease ? T.yes : T.no}</b>
         </div>
       </div>
-      <span class="verdict ${VERDICT_CLASS[r.verdict] || "caution"}">${esc(r.verdict)}</span>
+      <span class="verdict ${VERDICT_CLASS[r.verdict] || "caution"}">${esc(T.verdict[r.verdict] || r.verdict)}</span>
       <p class="headline">${esc(r.headline)}</p>
       <p class="summary">${esc(r.summary)}</p>
     </section>
 
     <section class="card">
-      <div class="card-head"><h2>Findings</h2><p>${findings.length} item${findings.length === 1 ? "" : "s"}, most significant first</p></div>
-      ${findingHtml || '<p class="muted">No findings were significant enough to report.</p>'}
+      <div class="card-head"><h2>${T.findings}</h2><p>${T.items(findings.length)}</p></div>
+      ${findingHtml || `<p class="muted">${T.none}</p>`}
     </section>
 
     <section class="card">
-      <div class="card-head"><h2>Questions for the landlord</h2><p>Ask before you sign</p></div>
+      <div class="card-head"><h2>${T.questions}</h2><p>${T.askBefore}</p></div>
       <ol class="questions">${r.questions_for_landlord.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
     </section>
 
+    ${coachCardHtml(result, T)}
+
     <section class="card">
       <div class="registry">
-        <h3>Sex offender registries</h3>
-        <p>We link to the official registries rather than searching them on your behalf. The official sites are the most current,
-           and their records should be read with the context and cautions those sites provide.</p>
-        <p><a href="${esc(result.registry_links.ct_registry)}" target="_blank" rel="noopener">Connecticut Sex Offender Registry</a>
-           &nbsp;·&nbsp; <a href="${esc(result.registry_links.national_registry)}" target="_blank" rel="noopener">National Sex Offender Public Website (U.S. DOJ)</a></p>
+        <h3>${T.registryTitle}</h3>
+        <p>${T.registryText}</p>
+        <p><a href="${esc(result.registry_links.ct_registry)}" target="_blank" rel="noopener">${T.ctReg}</a>
+           &nbsp;·&nbsp; <a href="${esc(result.registry_links.national_registry)}" target="_blank" rel="noopener">${T.natReg}</a></p>
       </div>
-      ${gaps.length ? `<h3 style="margin:28px 0 8px;color:var(--navy)">Scope and limitations</h3><ul>${gaps.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : ""}
+      ${gaps.length ? `<h3 style="margin:28px 0 8px;color:var(--navy)">${T.limits}</h3><ul>${gaps.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : ""}
     </section>
 
     <section class="card">
       <details class="behind">
-        <summary>Methodology and cost</summary>
+        <summary>${T.method}</summary>
         <p class="small">Model: ${esc(u.model)}. All figures below are measured from this review.</p>
         <table>
           <thead><tr><th>Review</th><th>AI calls</th><th>Input tokens</th><th>Cached</th><th>Output tokens</th><th>Cost</th></tr></thead>
@@ -310,12 +338,401 @@ function renderReport(result, jobId) {
     </section>
 
     <div class="report-actions">
-      <button class="secondary" onclick="window.print()">Print or save as PDF</button>
-      <button class="primary" onclick="window.scrollTo({top:0,behavior:'smooth'})">New verification</button>
+      <button class="secondary" onclick="window.print()">${T.print}</button>
+      <button class="primary" onclick="window.scrollTo({top:0,behavior:'smooth'})">${T.newCheck}</button>
     </div>
   `;
   $("#report").hidden = false;
+  setupCoach(result, jobId, T);
   $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 loadSamples();
+const prefill = new URLSearchParams(location.search).get("address");
+if (prefill) $("#address").value = prefill;
+
+
+// ------------------------------------------------------------ shortlist mode
+
+const LETTERS = "ABCDE";
+
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach((x) => {
+    x.classList.toggle("active", x === t);
+    x.setAttribute("aria-selected", x === t ? "true" : "false");
+  });
+  $("#check-form").hidden = t.dataset.tab !== "single";
+  $("#compare-form").hidden = t.dataset.tab !== "compare";
+  $("#listing-form").hidden = t.dataset.tab !== "listing";
+  $("#form-error").hidden = true;
+}));
+
+$("#compare-language").innerHTML = $("#language").innerHTML;
+$("#listing-language").innerHTML = $("#language").innerHTML;
+
+function relabelRows() {
+  document.querySelectorAll("#compare-rows .compare-row").forEach((row, i) => {
+    row.querySelector(".letter").textContent = LETTERS[i];
+  });
+  const n = document.querySelectorAll("#compare-rows .compare-row").length;
+  $("#add-row").hidden = n >= 5;
+  document.querySelectorAll("#compare-rows .remove").forEach((b) => { b.hidden = n <= 2; });
+}
+
+function addRow(address = "", rent = "") {
+  const row = document.createElement("div");
+  row.className = "compare-row";
+  row.innerHTML = `<span class="letter"></span>
+    <input type="text" class="addr" placeholder="Street address, town, CT" maxlength="200" aria-label="Apartment address" value="${esc(address)}">
+    <input type="text" class="rent" placeholder="$ per month" inputmode="decimal" maxlength="9" aria-label="Monthly rent (optional)" value="${esc(rent)}">
+    <button type="button" class="remove" title="Remove">×</button>`;
+  row.querySelector(".remove").addEventListener("click", () => { row.remove(); relabelRows(); });
+  $("#compare-rows").appendChild(row);
+  relabelRows();
+}
+
+addRow("224 Wooster St, New Haven, CT", "1850");
+addRow("31 Chapel St, New Haven, CT", "1500");
+addRow("114 Prospect St, East Hartford, CT", "1400");
+$("#add-row").addEventListener("click", () => addRow());
+
+$("#compare-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("#form-error").hidden = true;
+  const rows = [...document.querySelectorAll("#compare-rows .compare-row")]
+    .map((r) => ({ address: r.querySelector(".addr").value.trim(), rent: r.querySelector(".rent").value.trim() }))
+    .filter((r) => r.address);
+  if (rows.length < 2) { showFormError("Enter at least two addresses to compare."); return; }
+  const data = new FormData();
+  rows.forEach((r) => { data.append("address", r.address); data.append("rent", r.rent); });
+  data.append("language", $("#compare-language").value);
+  $("#compare-submit").disabled = true;
+  $("#compare-submit").textContent = "Starting…";
+  try {
+    const resp = await fetch("/api/compare", { method: "POST", body: data });
+    const body = await resp.json();
+    if (!resp.ok) throw new Error(body.detail || "Something went wrong.");
+    startCompareProgress(rows);
+    poll(body.job_id, 0);
+  } catch (ex) {
+    showFormError(ex.message);
+    resetButton();
+  }
+});
+
+function startCompareProgress(rows) {
+  $("#report").hidden = true;
+  $("#compare-result").hidden = true;
+  $("#team").hidden = true;
+  $("#compare-team").hidden = false;
+  $("#compare-team").innerHTML = rows.map((r, i) => `<li data-label="${LETTERS[i]}"><span class="dot"></span>
+      <div><strong>Apartment ${LETTERS[i]}</strong><span>${esc(r.address)}${r.rent ? ` · $${esc(r.rent)}/mo` : ""}</span></div><em>Pending</em></li>`).join("")
+    + `<li data-agent="Comparison Advisor"><span class="dot"></span><div><strong>Comparison Advisor</strong><span>Ranks the shortlist from the verified reports</span></div><em>Pending</em></li>`;
+  $("#activity").innerHTML = "";
+  $("#progress-status").textContent = "Getting started…";
+  $("#progress-card").hidden = false;
+  $("#progress-card").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function setCompareRow(label, state, text) {
+  const li = document.querySelector(`#compare-team li[data-label="${label}"]`);
+  if (!li) return;
+  li.className = state;
+  li.querySelector("em").textContent = text;
+}
+
+let compareMap = null;
+
+function renderCompare(result, jobId) {
+  const T = I18N[result.language] || I18N.en;
+  const c = result.comparison;
+  const byLabel = Object.fromEntries(result.apartments.map((a) => [a.label, a]));
+  const vclass = (a) => (a.report ? (VERDICT_CLASS[a.report.verdict] || "caution") : "none");
+  const counts = (a) => {
+    const f = (a.report && a.report.findings) || [];
+    return ["red", "yellow", "green"].map((s) => f.filter((x) => x.severity === s).length);
+  };
+
+  const rows = c.ranking.map((r) => {
+    const a = byLabel[r.label];
+    const [red, yellow, green] = counts(a);
+    return `<div class="rank-row">
+      <div class="rank-num">${r.rank}</div>
+      <div>
+        <h3>${esc(r.label)} · ${esc(prettyAddress(a.matched_address || a.address))}</h3>
+        <div class="rank-meta">${T.riskScore}: <b>${a.risk_points}</b> · ${a.rent ? `${T.rent}: $${Number(a.rent).toLocaleString("en-US")} · ` : ""}
+          <span class="verdict ${vclass(a)}" style="margin:0;padding:3px 9px;font-size:10.5px">${esc(T.verdict[a.report.verdict] || a.report.verdict)}</span>
+          · ${red} ${esc(T.severity.red)} · ${yellow} ${esc(T.severity.yellow)} · ${green} ${esc(T.severity.green)}</div>
+        <p style="margin:0 0 10px">${esc(stripIds(r.summary))}</p>
+        <div class="pc">
+          <div class="pro"><b>${T.strengths}</b><ul>${r.strengths.map((x) => `<li>${esc(stripIds(x))}</li>`).join("")}</ul></div>
+          <div class="con"><b>${T.concerns}</b><ul>${r.concerns.map((x) => `<li>${esc(stripIds(x))}</li>`).join("")}</ul></div>
+        </div>
+        <p style="margin:12px 0 0"><button class="secondary view-report" data-job="${esc(a.job_id)}">${T.viewReport}</button></p>
+      </div>
+    </div>`;
+  }).join("");
+
+  const failed = result.apartments.filter((a) => a.status !== "done");
+  const u = result.usage.totals;
+
+  $("#compare-result").innerHTML = `
+    <section class="card">
+      <div class="card-head"><h2>${T.comparison}</h2><p>${result.apartments.length} · ${money(u.cost_usd)} · ${result.seconds}s</p></div>
+      <div id="map"></div>
+      ${rows}
+      <p class="small" style="margin-top:14px">${esc(T.riskScore)}: ${esc(result.scoring)}</p>
+      ${failed.length ? `<p class="small">${T.notChecked}: ${failed.map((a) => `${esc(a.label)} (${esc(a.address)})`).join(", ")}</p>` : ""}
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>${T.recommendation}</h2></div>
+      <p>${esc(stripIds(c.recommendation))}</p>
+      <h3 style="margin:22px 0 6px;color:var(--navy)">${T.tradeoffs}</h3>
+      <p>${esc(stripIds(c.tradeoffs))}</p>
+    </section>`;
+  $("#compare-result").hidden = false;
+  $("#report").hidden = true;
+
+  // Interactive map: one pin per apartment, colored by verdict.
+  if (compareMap) { compareMap.remove(); compareMap = null; }
+  const located = result.apartments.filter((a) => a.lat && a.lng);
+  if (window.L && located.length) {
+    compareMap = L.map("map", { scrollWheelZoom: false }).setView([41.6, -72.7], 9);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(compareMap);
+    const rankOf = Object.fromEntries(c.ranking.map((r) => [r.label, r.rank]));
+    located.forEach((a) => {
+      const icon = L.divIcon({ className: "", html: `<div class="pin ${vclass(a)}">${esc(a.label)}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] });
+      L.marker([a.lat, a.lng], { icon }).addTo(compareMap).bindPopup(
+        `<b>${esc(a.label)} · ${esc(prettyAddress(a.matched_address || a.address))}</b><br>` +
+        (rankOf[a.label] ? `${T.rank} ${rankOf[a.label]} · ` : "") + `${esc(a.report ? (T.verdict[a.report.verdict] || a.report.verdict) : T.notChecked)}<br>` +
+        (a.report ? `${esc(a.report.headline)}<br>` : "") +
+        `<a href="#" class="map-report" data-job="${esc(a.job_id)}">${T.viewReport}</a>`);
+    });
+    const fit = () => { compareMap.invalidateSize(); compareMap.fitBounds(L.latLngBounds(located.map((a) => [a.lat, a.lng])), { padding: [40, 40], maxZoom: 15 }); };
+    fit(); setTimeout(fit, 300);  // refit once the page has finished laying out
+  }
+
+  $("#compare-result").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function openSubReport(jobId) {
+  const resp = await fetch(`/api/jobs/${jobId}`);
+  const body = await resp.json();
+  if (body.result && body.result.report) renderReport(body.result, jobId);
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".view-report, .map-report");
+  if (!btn) return;
+  e.preventDefault();
+  openSubReport(btn.dataset.job);
+});
+
+
+// ---------------------------------------------------------- negotiation coach
+
+const MAX_TURNS = 12;
+
+// Same selection as the server (app/coach.py): red and yellow items, lease first, at most 8.
+function negotiableIssues(result) {
+  const order = { red: 0, yellow: 1 };
+  return result.report.findings
+    .filter((f) => f.severity in order)
+    .map((f, i) => ({ f, i }))
+    .sort((a, b) => (a.f.category !== "lease") - (b.f.category !== "lease") || order[a.f.severity] - order[b.f.severity] || a.i - b.i)
+    .slice(0, 8)
+    .map(({ f }, k) => ({ id: k + 1, severity: f.severity, title: f.title }));
+}
+
+function coachCardHtml(result, T) {
+  const C = T.coachUI;
+  if (!negotiableIssues(result).length) return "";
+  const personas = Object.entries(C.personas).map(([k, [name, desc]], i) =>
+    `<label class="persona"><input type="radio" name="persona" value="${k}" ${i === 0 ? "checked" : ""}>
+       <b>${esc(name)}</b><span>${esc(desc)}</span></label>`).join("");
+  return `<section class="card" id="coach">
+    <div class="card-head"><h2>${esc(C.title)}</h2></div>
+    <p>${esc(C.intro)}</p>
+    <div class="coach-actions">
+      <button class="secondary" id="btn-letter">${esc(C.draftLetter)}</button>
+      <button class="secondary" id="btn-practice">${esc(C.practice)}</button>
+    </div>
+    <div id="letter-box" hidden></div>
+    <div id="practice-box" hidden>
+      <p class="field-label" style="margin-top:22px">${esc(C.choose)}</p>
+      <div class="personas">${personas}</div>
+      <div class="practice-grid">
+        <div>
+          <div id="chat" class="chat"></div>
+          <form id="chat-form" class="chat-form">
+            <textarea id="chat-input" rows="2" maxlength="800" placeholder="${esc(C.placeholder)}"></textarea>
+            <button class="primary" type="submit" id="chat-send">${esc(C.send)}</button>
+          </form>
+          <p class="small">${esc(C.note)}</p>
+        </div>
+        <aside class="scoreboard">
+          <p class="field-label">${esc(C.won)}: <span id="won-count">0</span>/<span id="won-total">0</span></p>
+          <ol id="issue-list" class="issue-list"></ol>
+          <p class="small">${esc(C.turnsLeft)}: <b id="turns-left">${MAX_TURNS}</b></p>
+          <button class="secondary" id="btn-restart" type="button">${esc(C.restart)}</button>
+        </aside>
+      </div>
+    </div>
+  </section>`;
+}
+
+function setupCoach(result, jobId, T) {
+  const C = T && T.coachUI;
+  if (!C || !$("#coach")) return;
+  const issues = negotiableIssues(result);
+  let history = [], won = new Set(), busy = false;
+
+  const renderIssues = () => {
+    $("#issue-list").innerHTML = issues.map((i) =>
+      `<li class="${won.has(i.id) ? "won" : ""}"><span class="tag ${i.severity}" style="margin:0 6px 0 0">${won.has(i.id) ? "✓" : i.id}</span>${esc(stripIds(i.title))}</li>`).join("");
+    $("#won-count").textContent = won.size;
+    $("#won-total").textContent = issues.length;
+    $("#turns-left").textContent = Math.max(0, MAX_TURNS - history.length / 2);
+  };
+  const say = (who, cls, text, extra = "") => {
+    const div = document.createElement("div");
+    div.className = `msg ${cls}`;
+    div.innerHTML = `<b>${esc(who)}</b>${extra}<p>${esc(text)}</p>`;
+    $("#chat").appendChild(div);
+    $("#chat").scrollTop = $("#chat").scrollHeight;
+  };
+  const reset = () => { history = []; won = new Set(); $("#chat").innerHTML = ""; renderIssues(); };
+
+  $("#btn-letter").addEventListener("click", async () => {
+    const box = $("#letter-box");
+    box.hidden = false;
+    box.innerHTML = `<p class="muted" style="margin-top:18px">…</p>`;
+    $("#btn-letter").disabled = true;
+    try {
+      const resp = await fetch(`/api/jobs/${jobId}/letter`, { method: "POST" });
+      const body = await resp.json();
+      if (!resp.ok) throw new Error(body.detail || "Error");
+      box.innerHTML = `<div class="letter-card"><p class="small">${esc(C.letterNote)}</p>
+        <p><b>Subject:</b> ${esc(body.subject)}</p><pre>${esc(body.body)}</pre>
+        <button class="secondary" id="btn-copy">${esc(C.copy)}</button></div>`;
+      $("#btn-copy").addEventListener("click", async () => {
+        await navigator.clipboard.writeText(`Subject: ${body.subject}\n\n${body.body}`);
+        $("#btn-copy").textContent = C.copied;
+      });
+    } catch (ex) {
+      box.innerHTML = `<p class="error">${esc(ex.message)}</p>`;
+    } finally {
+      $("#btn-letter").disabled = false;
+    }
+  });
+
+  $("#btn-practice").addEventListener("click", () => {
+    $("#practice-box").hidden = false;
+    renderIssues();
+    $("#chat-input").focus();
+  });
+  $("#btn-restart").addEventListener("click", reset);
+  document.querySelectorAll('input[name="persona"]').forEach((r) => r.addEventListener("change", reset));
+
+  $("#chat-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = $("#chat-input").value.trim();
+    if (!message || busy) return;
+    if (history.length / 2 >= MAX_TURNS) return;
+    busy = true;
+    $("#chat-send").disabled = true;
+    $("#chat-input").value = "";
+    say(C.you, "you", message);
+    const persona = document.querySelector('input[name="persona"]:checked').value;
+    try {
+      const resp = await fetch(`/api/jobs/${jobId}/practice`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ persona, history, message }),
+      });
+      const body = await resp.json();
+      if (!resp.ok) throw new Error(body.detail || "Error");
+      history.push({ role: "tenant", text: message }, { role: "landlord", text: body.reply });
+      body.conceded.forEach((id) => won.add(id));
+      say(C.landlord, "landlord", body.reply);
+      say(C.coach, "coach", body.tip, ` <span class="stars">${"★".repeat(body.score)}${"☆".repeat(5 - body.score)}</span>`);
+      renderIssues();
+      if (won.size === issues.length) say(C.coach, "coach win", C.allWon);
+    } catch (ex) {
+      say("!", "coach", ex.message);
+    } finally {
+      busy = false;
+      $("#chat-send").disabled = history.length / 2 >= MAX_TURNS;
+    }
+  });
+}
+
+
+// ---------------------------------------------------------------- listing mode
+
+document.querySelectorAll("[data-listing]").forEach((b) => b.addEventListener("click", async () => {
+  const resp = await fetch(`/api/sample-listing/${b.dataset.listing}`);
+  $("#listing-text").value = (await resp.json()).text;
+}));
+
+$("#listing-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("#form-error").hidden = true;
+  const text = $("#listing-text").value.trim();
+  if (text.length < 40) { showFormError("Paste the full listing text first."); return; }
+  const data = new FormData();
+  data.append("listing_text", text);
+  data.append("language", $("#listing-language").value);
+  $("#listing-submit").disabled = true;
+  $("#listing-submit").textContent = "Starting…";
+  try {
+    const resp = await fetch("/api/listing", { method: "POST", body: data });
+    const body = await resp.json();
+    if (!resp.ok) throw new Error(body.detail || "Something went wrong.");
+    startProgress(false);
+    $("#team").hidden = true;
+    poll(body.job_id, 0);
+  } catch (ex) {
+    showFormError(ex.message);
+    resetButton();
+  }
+});
+
+function renderListing(result, jobId) {
+  const T = I18N[result.language] || I18N.en;
+  const L = T.listingUI;
+  const r = result.report;
+  const evidence = Object.fromEntries((result.evidence || []).map((e) => [e.id, e]));
+  const findings = [...r.findings].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
+  const addr = result.address && result.address.matched_address;
+  $("#compare-result").hidden = true;
+  $("#report").innerHTML = `
+    <section class="card">
+      <div class="report-head"><div><p class="eyebrow">${esc(L.eyebrow)}</p>
+        <div class="report-address">${addr ? esc(prettyAddress(addr)) : "—"}</div></div>
+        <div class="report-meta">${T.reportNo} <b>${esc(String(jobId).toUpperCase())}</b></div></div>
+      <span class="verdict risk-${esc(r.risk)}">${esc(L.risk[r.risk] || r.risk)}</span>
+      <p class="headline">${esc(r.headline)}</p>
+      <p class="summary">${esc(r.summary)}</p>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>${T.findings}</h2><p>${T.items(findings.length)}</p></div>
+      ${findingsHtml(findings, evidence, T)}
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>${esc(L.nextSteps)}</h2></div>
+      <ol class="questions">${r.next_steps.map((q) => `<li>${esc(stripIds(q))}</li>`).join("")}</ol>
+      <div class="coach-actions">
+        <a class="secondary" style="text-decoration:none;padding:11px 20px;border:1px solid #c9ced6" href="${esc(result.ftc_report_url)}" target="_blank" rel="noopener">${esc(L.ftc)}</a>
+        ${addr ? `<button class="primary" id="btn-full-check">${esc(L.fullCheck)}</button>` : ""}
+      </div>
+    </section>`;
+  $("#report").hidden = false;
+  if (addr) $("#btn-full-check").addEventListener("click", () => {
+    document.querySelector('.tab[data-tab="single"]').click();
+    $("#address").value = prettyAddress(addr);
+    $("#form-card").scrollIntoView({ behavior: "smooth" });
+  });
+  $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
+}

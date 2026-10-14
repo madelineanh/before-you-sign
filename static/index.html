@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Before You Sign · Lease &amp; Property Verification</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -72,6 +74,56 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--navy
 .chip { font: inherit; font-size: 13px; border: 0; background: none; color: var(--navy); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #b9c2cf; padding: 0 4px; cursor: pointer; }
 .chip:hover { text-decoration-color: var(--navy); }
 .lease-options { border: 0; padding: 0; margin: 30px 0 0; }
+.lang-row { margin: 30px 0 0; }
+#listing-text { width: 100%; font: inherit; font-size: 15px; padding: 12px 14px; border: 1px solid #c9ced6; border-radius: 2px; resize: vertical; }
+.verdict.risk-High { background: var(--red-soft); color: var(--red); }
+.verdict.risk-Elevated { background: var(--amber-soft); color: var(--amber); }
+.verdict.risk-Low { background: var(--green-soft); color: var(--green); }
+.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--hairline); margin-bottom: 28px; }
+.tab { font: inherit; font-family: var(--serif); font-size: 22px; color: var(--slate); background: none; border: 0; border-bottom: 2px solid transparent; padding: 0 2px 14px; margin-right: 34px; cursor: pointer; }
+.tab.active { color: var(--navy); border-bottom-color: var(--brass); }
+.compare-head { display: grid; grid-template-columns: 34px 1fr 200px 32px; gap: 10px; margin-bottom: 8px; white-space: nowrap; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--slate); }
+.compare-head em { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.compare-row { display: grid; grid-template-columns: 34px 1fr 200px 32px; gap: 10px; align-items: center; margin-bottom: 10px; }
+.compare-row .letter { font-family: var(--serif); font-size: 22px; color: var(--navy); text-align: center; }
+.compare-row input { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border: 1px solid #c9ced6; border-radius: 2px; }
+.compare-row .remove { background: none; border: 0; color: var(--slate); font-size: 20px; cursor: pointer; }
+#map { height: 380px; border: 1px solid var(--hairline); margin-bottom: 26px; z-index: 0; }
+.pin { width: 30px; height: 30px; border-radius: 50%; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.pin.good { background: var(--green); } .pin.caution { background: #b07d12; } .pin.serious { background: var(--red); } .pin.none { background: #8a929e; }
+.rank-row { display: grid; grid-template-columns: 56px 1fr; gap: 18px; padding: 20px 0; border-top: 1px solid var(--hairline); }
+.rank-row:first-of-type { border-top: 0; }
+.rank-num { font-family: var(--serif); font-size: 40px; color: var(--navy); line-height: 1; }
+.rank-row h3 { font-size: 22px; color: var(--navy); margin-bottom: 4px; }
+.rank-meta { font-size: 13px; color: var(--slate); margin-bottom: 8px; }
+.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; font-size: 14.5px; }
+.pc ul { margin: 4px 0 0; padding-left: 18px; }
+.pc b { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.pc .pro b { color: var(--green); } .pc .con b { color: var(--red); }
+.coach-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.letter-card { margin-top: 20px; border: 1px solid var(--hairline); background: var(--bg); padding: 18px 22px; }
+.letter-card pre { white-space: pre-wrap; font-family: var(--sans); font-size: 15px; line-height: 1.6; margin: 10px 0 14px; }
+.personas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.persona { border: 1px solid var(--hairline); padding: 12px 14px; cursor: pointer; font-size: 14px; }
+.persona input { accent-color: var(--navy); margin-right: 6px; }
+.persona span { display: block; color: var(--slate); font-size: 13px; margin-top: 4px; }
+.persona:has(input:checked) { border-color: var(--navy); background: var(--blue-soft); }
+.practice-grid { display: grid; grid-template-columns: 1fr 260px; gap: 22px; margin-top: 18px; }
+.chat { height: 340px; overflow-y: auto; border: 1px solid var(--hairline); padding: 14px; background: var(--bg); }
+.msg { margin: 0 0 12px; padding: 10px 14px; border-radius: 3px; max-width: 88%; font-size: 15px; }
+.msg p { margin: 4px 0 0; }
+.msg.you { background: var(--navy); color: #fff; margin-left: auto; }
+.msg.landlord { background: #fff; border: 1px solid var(--hairline); }
+.msg.coach { background: var(--amber-soft); border-left: 3px solid var(--brass); font-size: 14px; max-width: 100%; }
+.msg.win { background: var(--green-soft); border-left-color: var(--green); }
+.stars { color: var(--brass); letter-spacing: 1px; margin-left: 6px; }
+.chat-form { display: flex; gap: 10px; margin-top: 10px; }
+.chat-form textarea { flex: 1; font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid #c9ced6; border-radius: 2px; resize: vertical; }
+.scoreboard { border: 1px solid var(--hairline); padding: 16px; }
+.issue-list { list-style: none; padding: 0; margin: 0 0 12px; font-size: 13.5px; }
+.issue-list li { padding: 6px 0; border-bottom: 1px dotted var(--hairline); }
+.issue-list li.won { color: var(--green); text-decoration: line-through; text-decoration-color: rgba(36,96,58,.4); }
+.lang-row select { width: auto; min-width: 280px; font-size: 15px; padding: 11px 12px; }
 .radio { display: block; margin: 8px 0; cursor: pointer; font-size: 15px; }
 .radio input { margin-right: 10px; accent-color: var(--navy); }
 .sub-row { margin: 12px 0 0 26px; }
@@ -188,11 +240,17 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
   .report-head { flex-direction: column; }
   .report-meta { text-align: left; }
   .sub-row select { min-width: 0; width: 100%; margin-bottom: 8px; }
+  .compare-row { grid-template-columns: 26px 1fr 32px; }
+  .compare-head { display: none; }
+  .compare-row .rent { grid-column: 2; }
+  .pc { grid-template-columns: 1fr; }
+  .tab { font-size: 18px; margin-right: 18px; }
+  .personas, .practice-grid { grid-template-columns: 1fr; }
   footer .wrap { grid-template-columns: 1fr; }
 }
 
 @media print {
-  .nav, .hero, #form-card, #progress-card, .sources-strip, .section, footer, .report-actions, details.behind { display: none !important; }
+  .nav, .hero, #form-card, #progress-card, .sources-strip, .section, footer, .report-actions, details.behind, #map, #coach { display: none !important; }
   main.wrap { margin-top: 0; }
   body, html { background: #fff; }
   .card { box-shadow: none; border: 0; padding: 0 0 18px; }
@@ -216,6 +274,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#sources">Sources</a>
+      <a href="/org">For organizations</a>
       <span class="secure">
         <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
         Lease text never saved
@@ -226,7 +285,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
 
 <header class="hero">
   <div class="wrap">
-    <p class="eyebrow">New Haven, Connecticut</p>
+    <p class="eyebrow">Connecticut · all 169 towns</p>
     <h1>Know exactly what you're signing.</h1>
     <p class="lede">An independent review of the property, its owner, and your lease, drawn from official public records and checked against Connecticut law.</p>
   </div>
@@ -234,18 +293,19 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
 
 <main class="wrap">
   <section class="card" id="form-card">
-    <div class="card-head">
-      <h2>Request a verification</h2>
-      <p>Typically ready in under a minute</p>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="single" role="tab" aria-selected="true">Verify one property</button>
+      <button type="button" class="tab" data-tab="compare" role="tab" aria-selected="false">Compare a shortlist</button>
+      <button type="button" class="tab" data-tab="listing" role="tab" aria-selected="false">Check a listing for scams</button>
     </div>
     <form id="check-form">
       <label class="field-label" for="address">Property address</label>
       <input id="address" name="address" type="text" autocomplete="street-address"
-             placeholder="Street address, New Haven, CT" required minlength="5" maxlength="200">
+             placeholder="Street address, town, CT" required minlength="5" maxlength="200">
       <p class="hint">Examples:
-        <button type="button" class="chip" data-address="31 Chapel St, New Haven, CT">31 Chapel St</button>
-        <button type="button" class="chip" data-address="100 Howe St, New Haven, CT">100 Howe St</button>
-        <button type="button" class="chip" data-address="224 Wooster St, New Haven, CT">224 Wooster St</button>
+        <button type="button" class="chip" data-address="31 Chapel St, New Haven, CT">31 Chapel St, New Haven</button>
+        <button type="button" class="chip" data-address="114 Prospect St, East Hartford, CT">114 Prospect St, East Hartford</button>
+        <button type="button" class="chip" data-address="224 Wooster St, New Haven, CT">224 Wooster St, New Haven</button>
       </p>
 
       <fieldset class="lease-options">
@@ -263,12 +323,56 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
         </div>
       </fieldset>
 
+      <div class="lang-row">
+        <label class="field-label" for="language">Report language</label>
+        <select id="language" name="language">
+          <option value="en">English</option>
+          <option value="es">Español (Spanish)</option>
+          <option value="pt">Português (Portuguese)</option>
+          <option value="zh">简体中文 (Chinese)</option>
+          <option value="ko">한국어 (Korean)</option>
+          <option value="fr">Français (French)</option>
+        </select>
+      </div>
+
       <div class="actions">
         <button id="submit" type="submit" class="primary">Begin verification</button>
-        <p class="fineprint">Every finding is cited to its official source.</p>
+        <p class="fineprint">Typically ready in under a minute. Every finding is cited to its official source.</p>
       </div>
-      <p id="form-error" class="error" role="alert" hidden></p>
     </form>
+
+    <form id="compare-form" hidden>
+      <p class="hint" style="margin:0 0 18px">Enter 2–5 apartments you're considering, with the monthly rent from each listing if you have it. Each one gets a full verification, then the shortlist is ranked and mapped.</p>
+      <div class="compare-head" aria-hidden="true"><span></span><span>Apartment address</span><span>Monthly rent <em>(optional)</em></span><span></span></div>
+      <div id="compare-rows"></div>
+      <button type="button" class="secondary" id="add-row">+ Add another apartment</button>
+      <div class="lang-row">
+        <label class="field-label" for="compare-language">Report language</label>
+        <select id="compare-language"></select>
+      </div>
+      <div class="actions">
+        <button id="compare-submit" type="submit" class="primary">Compare apartments</button>
+        <p class="fineprint">About 1–2 minutes for three apartments. Add leases in single-property mode.</p>
+      </div>
+    </form>
+    <form id="listing-form" hidden>
+      <p class="hint" style="margin:0 0 18px">Found an apartment online? Paste the whole listing (title, description and contact details). We check it against known rental-scam warning signs and the public owner of record, before you send anyone money.</p>
+      <label class="field-label" for="listing-text">Listing text</label>
+      <textarea id="listing-text" rows="9" maxlength="20000" placeholder="Paste the listing from Zillow, Craigslist, Facebook Marketplace…"></textarea>
+      <p class="hint">Try a sample:
+        <button type="button" class="chip" data-listing="scam">Suspicious listing</button>
+        <button type="button" class="chip" data-listing="normal">Typical listing</button>
+      </p>
+      <div class="lang-row">
+        <label class="field-label" for="listing-language">Report language</label>
+        <select id="listing-language"></select>
+      </div>
+      <div class="actions">
+        <button id="listing-submit" type="submit" class="primary">Check this listing</button>
+        <p class="fineprint">About 20 seconds. The listing text is used for this check only and never saved.</p>
+      </div>
+    </form>
+    <p id="form-error" class="error" role="alert" hidden></p>
   </section>
 
   <section class="card" id="progress-card" hidden>
@@ -282,12 +386,14 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
       <li data-agent="Neighborhood Scout"><span class="dot"></span><div><strong>Property &amp; Area Records</strong><span>311 service reports, eviction filings, FEMA flood zone</span></div><em>Pending</em></li>
       <li data-agent="Lease Reviewer"><span class="dot"></span><div><strong>Lease Compliance</strong><span>Each clause checked against Connecticut tenant law</span></div><em>Pending</em></li>
     </ul>
+    <ul class="team" id="compare-team" hidden></ul>
     <details class="activity">
       <summary>View activity log</summary>
       <ol id="activity"></ol>
     </details>
   </section>
 
+  <section id="compare-result" hidden></section>
   <section id="report" hidden></section>
 
   <div class="sources-strip" id="sources">
@@ -298,7 +404,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
       <li>U.S. Census Bureau</li>
       <li>FEMA Flood Maps</li>
       <li>Eviction Lab, Princeton</li>
-      <li>New Haven 311</li>
+      <li>SeeClickFix 311</li>
       <li>Connecticut General Statutes</li>
     </ul>
   </div>
@@ -312,7 +418,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
       <div class="col">
         <svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="13" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M19 19 L26 26" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <h3>Ownership</h3>
-        <p>We identify the owner of record, the size of their New Haven holdings, and the people registered behind any LLC.</p>
+        <p>We identify the owner of record, the size of their Connecticut holdings, and the people registered behind any LLC.</p>
       </div>
       <div class="col">
         <svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 14 L15 5 L26 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 12.5 V25 H23 V12.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -345,16 +451,17 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
         </svg>
         <span><span class="brand-name">Before You Sign</span><span class="brand-sub">Lease &amp; Property Verification</span></span>
       </a>
-      <p>Independent verification of New Haven rental properties, owners, and leases.</p>
+      <p>Independent verification of Connecticut rental properties, owners, and leases.</p>
     </div>
     <div>
       <p>Before You Sign provides information from public records. It is not legal advice.</p>
-      <p>For help with a lease, contact <a href="https://ctlawhelp.org" target="_blank" rel="noopener">CTLawHelp</a> or New Haven Legal Assistance.</p>
+      <p>For help with a lease, contact <a href="https://ctlawhelp.org" target="_blank" rel="noopener">CTLawHelp</a> or your local legal aid office.</p>
     </div>
-    <p class="legal">Built as a student project for MGT 409, AI Foundations for Managers. Data from data.ct.gov, the U.S. Census Bureau, New Haven 311 (SeeClickFix), Eviction Lab and FEMA.</p>
+    <p class="legal">Built as a student project for MGT 409, AI Foundations for Managers. Data from data.ct.gov, the U.S. Census Bureau, SeeClickFix 311, Eviction Lab and FEMA.</p>
   </div>
 </footer>
 
+<script src="/static/i18n.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

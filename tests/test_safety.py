@@ -29,8 +29,8 @@ from app.safety import REMOVED_MARKER, Ledger, check_finding, filter_untrusted  
 
 RESULTS: list[dict] = []
 ADDRESS = {"matched_address": "224 WOOSTER ST, NEW HAVEN, CT, 06511", "street_number": "224",
-           "street_name": "WOOSTER", "city": "NEW HAVEN", "state": "CT", "lat": 41.3036, "lng": -72.9154,
-           "tract_geoid": "09170142100"}
+           "street_name": "WOOSTER", "city": "NEW HAVEN", "town": "New Haven", "state": "CT", "lat": 41.3036, "lng": -72.9154,
+           "tract_geoid": "09009142200"}
 
 
 def record(name: str, passed: bool, detail: str) -> None:
@@ -110,6 +110,71 @@ def test_fact_check_accepts_statute_citations() -> None:
            f"problems -> {problems}")
 
 
+def test_practice_landlord_cannot_concede_unknown_issues() -> None:
+    from app.coach import LandlordTurn, PracticeState, _LandlordDeps, _landlord_valid
+    ctx = SimpleNamespace(deps=_LandlordDeps(PracticeState(issue_ids={1, 2, 3})))
+    out = _landlord_valid(ctx, LandlordTurn(reply="Fine, I'll fix everything.", conceded_issue_ids=[2, 7, 99]))
+    record("Practice landlord can only concede issues that are in the renter's report",
+           out.conceded_issue_ids == [2], f"asked to concede [2, 7, 99] -> kept {out.conceded_issue_ids}")
+
+
+def test_comparison_ranking_is_fixed_by_code() -> None:
+    from pydantic_ai import ModelRetry
+    from app.agents import CompareState, _compare_valid
+    from app.models import Comparison, RankedApartment
+    state = CompareState(labels=["A", "B"], context_text='{"rent": 1800, "risk_points": 8}', ranks={"A": 2, "B": 1})
+    ctx = SimpleNamespace(deps=state, retry=0, max_retries=2)
+    swapped = Comparison(ranking=[RankedApartment(label="A", rank=1, summary="Best"),
+                                  RankedApartment(label="B", rank=2, summary="Second")],
+                         recommendation="Pick A, it saves $450 a month.", tradeoffs="None.")
+    try:
+        _compare_valid(ctx, swapped)
+        ok, detail = False, "accepted a reordered ranking"
+    except ModelRetry as exc:
+        ok, detail = "fixed ranks" in str(exc) and "450" in str(exc), str(exc)[:200]
+    record("Comparison Advisor cannot reorder the code-computed ranking or invent numbers", ok, detail)
+
+
+def test_practice_endpoint_limits() -> None:
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.runner import JOBS, Job
+    job = Job(id="testjob", address_input="x", has_lease=True, status="done",
+              result={"report": {"findings": [], "verdict": "Looks good"}, "language": "en"})
+    JOBS[job.id] = job
+    c = TestClient(app)
+    long_msg = c.post("/api/jobs/testjob/practice", json={"persona": "tough", "message": "x" * 900, "history": []}).status_code
+    bad_persona = c.post("/api/jobs/testjob/practice", json={"persona": "evil", "message": "hi", "history": []}).status_code
+    too_long = c.post("/api/jobs/testjob/practice", json={"persona": "tough", "message": "hi",
+                                                          "history": [{"role": "tenant", "text": "a"}] * 24}).status_code
+    missing = c.post("/api/jobs/nope/practice", json={"persona": "tough", "message": "hi"}).status_code
+    JOBS.pop(job.id, None)
+    record("Practice endpoint enforces message length, persona list, 12-turn cap and real reports",
+           (long_msg, bad_persona, too_long, missing) == (400, 400, 400, 404),
+           f"900-char message -> {long_msg}; unknown persona -> {bad_persona}; 13th turn -> {too_long}; unknown report -> {missing}")
+
+
+async def test_scam_scan_rules() -> None:
+    from app.listing import ListingState, scan_scam_patterns
+    found = {}
+    for name in ("listing_scam.txt", "listing_normal.txt"):
+        st = ListingState(job_id="t", address={"matched_address": ""}, emit=lambda *a, **k: None,
+                          listing_text=(ROOT / "samples" / name).read_text())
+        out = await scan_scam_patterns(SimpleNamespace(deps=st))
+        found[name] = sorted(h["sign"] for h in out["warning_signs_found"])
+    want = {"untraceable_payment", "pay_before_viewing", "cannot_show", "pressure", "off_platform"}
+    record("Scam rules catch all five warning signs in the suspicious sample and none in the normal one",
+           set(found["listing_scam.txt"]) == want and not found["listing_normal.txt"], f"{found}")
+
+
+def test_listing_text_never_logged() -> None:
+    from app.runner import _loggable
+    secret = "Text me at 203-555-0147 about the apartment"
+    logged = json.dumps(_loggable("LISTING", secret)) + json.dumps(_loggable("LEASE", secret))
+    record("Pasted listings and leases are never written to the logs (only length and a fingerprint)",
+           "203-555-0147" not in logged, logged[:160])
+
+
 async def test_people_search_blocked() -> None:
     state = new_state()
     ctx = SimpleNamespace(deps=state)
@@ -149,12 +214,12 @@ async def test_loop_guard() -> None:
            "error" in out and any(e["type"] == "loop_guard" for e in state.safety_events), f"returned {out}")
 
 
-async def test_out_of_scope_address() -> None:
+async def test_out_of_state_address() -> None:
     job = new_job("1600 Pennsylvania Ave NW, Washington, DC", has_lease=False)
     await run_check(job, job.address_input, None)
     no_ai = not (job.result or {}).get("usage")
-    record("Addresses outside New Haven are refused before any AI call",
-           job.status == "error" and "New Haven" in (job.error or "") and no_ai, f"error={job.error!r}")
+    record("Addresses outside Connecticut are refused before any AI call",
+           job.status == "error" and "Connecticut" in (job.error or "") and no_ai, f"error={job.error!r}")
 
 
 # -------------------------------------------------------------------- live
@@ -205,11 +270,16 @@ async def main() -> None:
     test_fact_check_rejects_invented_numbers()
     test_fact_check_rejects_made_up_citations_and_quotes()
     test_fact_check_accepts_statute_citations()
+    test_practice_landlord_cannot_concede_unknown_issues()
+    test_comparison_ranking_is_fixed_by_code()
+    test_practice_endpoint_limits()
+    await test_scam_scan_rules()
+    test_listing_text_never_logged()
     await test_people_search_blocked()
     await test_portfolio_lookup_limited_to_owner()
     await test_budget_stop()
     await test_loop_guard()
-    await test_out_of_scope_address()
+    await test_out_of_state_address()
     if "--live" in sys.argv:
         await test_live_injection()
     LOG_DIR.mkdir(exist_ok=True)

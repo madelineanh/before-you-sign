@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before You Sign · User study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --navy:#0b1f3a; --ink:#1a1f2b; --slate:#5b6472; --line:#e3e6eb; --bg:#f7f8fa; --brass:#a8854f; --green:#24603a; --green-soft:#ebf4ee; --red:#8f1d2c; --red-soft:#f7ecee; --blue-soft:#eef2f7;
+        --serif:"EB Garamond", Georgia, serif; --sans:"Inter", "Helvetica Neue", Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.bar { background: var(--navy); color: #fff; padding: 18px 0; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+.bar a { color: #c8d2e0; font-size: 14px; margin-left: 18px; }
+h1, h2 { font-family: var(--serif); font-weight: 500; color: var(--navy); margin: 0; }
+.bar h1 { color: #fff; font-size: 26px; display: inline; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 3px; padding: 30px 34px; margin: 24px 0; }
+.card h2 { font-size: 26px; margin-bottom: 4px; }
+.step { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); margin: 0 0 6px; }
+label.f { display: block; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--slate); margin: 16px 0 6px; }
+input[type=text], select, textarea { width: 100%; font: inherit; padding: 11px 13px; border: 1px solid #c9ced6; border-radius: 2px; }
+textarea { resize: vertical; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.checks label { display: block; margin: 6px 0; }
+.checks input { margin-right: 8px; accent-color: var(--navy); }
+.timer { display: flex; align-items: center; gap: 16px; margin: 14px 0; }
+.clock { font-family: var(--serif); font-size: 40px; color: var(--navy); min-width: 130px; }
+button { font: inherit; font-weight: 600; border-radius: 2px; padding: 11px 20px; cursor: pointer; }
+.primary { background: var(--navy); color: #fff; border: 0; }
+.secondary { background: #fff; color: var(--navy); border: 1px solid #c9ced6; }
+.scale { display: flex; gap: 6px; flex-wrap: wrap; }
+.scale label { border: 1px solid var(--line); padding: 6px 12px; cursor: pointer; }
+.scale input { margin-right: 4px; accent-color: var(--navy); }
+.note { font-size: 14px; color: var(--slate); }
+.ok { background: var(--green-soft); color: var(--green); padding: 12px 16px; margin-top: 16px; }
+.err { background: var(--red-soft); color: var(--red); padding: 12px 16px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap"><h1>Before You Sign · User study</h1><a href="/study/results">Results</a><a href="/" target="_blank">Open the app</a></div></div>
+<main class="wrap">
+
+<section class="card">
+  <p class="step">Before you start</p>
+  <h2>Participant</h2>
+  <p class="note">For the facilitator. No names are recorded: use an ID like P1. Results are saved only on this computer (logs/study/).</p>
+  <div class="row">
+    <div><label class="f" for="pid">Participant ID</label><input type="text" id="pid" placeholder="P1" maxlength="10"></div>
+    <div><label class="f" for="role">Who they are</label>
+      <select id="role"><option>Graduate / professional student</option><option>Undergraduate</option><option>Young professional</option><option>International student</option><option>Housing / nonprofit staff</option><option>Other renter</option></select></div>
+  </div>
+  <div class="row">
+    <div><label class="f" for="address">Address they care about</label><input type="text" id="address" placeholder="Street, town, CT" maxlength="200"></div>
+    <div><label class="f" for="lease">Lease used</label>
+      <select id="lease"><option value="none">None</option><option value="own">Their own lease</option><option value="sample">A sample lease</option></select></div>
+  </div>
+  <div class="checks" style="margin-top:14px"><label><input type="checkbox" id="consent"> The participant agreed to take part and to anonymous notes and quotes being used in a class report.</label></div>
+</section>
+
+<section class="card">
+  <p class="step">Step 1 · By hand (up to 15 minutes)</p>
+  <h2>How it's done today</h2>
+  <p class="note">Ask them to check the apartment using any websites they like (assessor, Google, ChatGPT…). Stop when they say they're done or at 15 minutes.</p>
+  <div class="timer"><span class="clock" id="clock-manual">0:00</span><button class="secondary" data-timer="manual">Start</button></div>
+  <label class="f">What they found by hand</label>
+  <div class="checks" id="found-manual"></div>
+  <label class="f" for="notes-manual">Notes (tools used, where they got stuck)</label>
+  <textarea id="notes-manual" rows="2"></textarea>
+</section>
+
+<section class="card">
+  <p class="step">Step 2 · With Before You Sign</p>
+  <h2>With the app</h2>
+  <p class="note">Open the app with their address, start the timer, and stop it when they've finished reading the report.</p>
+  <div class="timer"><span class="clock" id="clock-app">0:00</span><button class="secondary" data-timer="app">Start</button>
+    <button class="secondary" id="open-app" type="button">Open app with this address</button></div>
+  <label class="f">What the app showed them</label>
+  <div class="checks" id="found-app"></div>
+  <label class="f">Features they tried</label>
+  <div class="checks" id="features"></div>
+</section>
+
+<section class="card">
+  <p class="step">Step 3 · Feedback</p>
+  <h2>Their reaction</h2>
+  <label class="f">How useful was the report? (1 = not at all, 5 = extremely)</label><div class="scale" id="useful"></div>
+  <label class="f">How much do you trust what it says? (1–5)</label><div class="scale" id="trust"></div>
+  <label class="f">How likely are you to recommend it to a friend who is renting? (0–10)</label><div class="scale" id="recommend"></div>
+  <label class="f">Would you use it before signing your next lease?</label>
+  <div class="scale" id="would"></div>
+  <label class="f" for="caught">What did the app show you that you didn't find yourself? (their words)</label>
+  <textarea id="caught" rows="2"></textarea>
+  <label class="f" for="quote">Direct quote</label>
+  <textarea id="quote" rows="2" placeholder="&quot;…&quot;"></textarea>
+  <label class="f" for="change">What would you change?</label>
+  <textarea id="change" rows="2"></textarea>
+  <div style="margin-top:22px"><button class="primary" id="save">Save this session</button></div>
+  <div id="msg"></div>
+</section>
+</main>
+
+<script>
+const ITEMS = [
+  ["owner", "Who owns the building (owner of record)"],
+  ["llc_people", "The people or companies behind an owner LLC"],
+  ["portfolio", "How many other properties the owner holds"],
+  ["complaints", "311 / code complaints at or near the address"],
+  ["evictions", "Eviction activity in the area"],
+  ["flood", "Flood risk"],
+  ["lease_issues", "Illegal or risky lease clauses"],
+  ["questions", "Specific questions to ask the landlord"],
+];
+const FEATURES = [["compare", "Shortlist comparison / map"], ["language", "Report in another language"],
+                  ["letter", "Letter to the landlord"], ["practice", "Practice negotiation"]];
+const $ = (s) => document.querySelector(s);
+const boxes = (id, items) => { $(id).innerHTML = items.map(([k, t]) => `<label><input type="checkbox" value="${k}"> ${t}</label>`).join(""); };
+boxes("#found-manual", ITEMS); boxes("#found-app", ITEMS); boxes("#features", FEATURES);
+const scale = (id, from, to) => { $(id).innerHTML = Array.from({ length: to - from + 1 }, (_, i) => from + i)
+  .map((v) => `<label><input type="radio" name="${id.slice(1)}" value="${v}">${v}</label>`).join(""); };
+scale("#useful", 1, 5); scale("#trust", 1, 5); scale("#recommend", 0, 10);
+$("#would").innerHTML = ["Yes", "Maybe", "No"].map((v) => `<label><input type="radio" name="would" value="${v}">${v}</label>`).join("");
+
+const timers = { manual: { start: null, total: 0, h: null }, app: { start: null, total: 0, h: null } };
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const elapsed = (t) => t.total + (t.start ? (Date.now() - t.start) / 1000 : 0);
+document.querySelectorAll("[data-timer]").forEach((b) => b.addEventListener("click", () => {
+  const k = b.dataset.timer, t = timers[k];
+  if (t.start) { t.total = elapsed(t); t.start = null; clearInterval(t.h); b.textContent = t.total ? "Resume" : "Start"; }
+  else { t.start = Date.now(); t.h = setInterval(() => { $(`#clock-${k}`).textContent = fmt(elapsed(t)); }, 250); b.textContent = "Stop"; }
+}));
+$("#open-app").addEventListener("click", () => window.open(`/?address=${encodeURIComponent($("#address").value.trim())}`, "_blank"));
+
+const checked = (id) => [...document.querySelectorAll(`${id} input:checked`)].map((i) => i.value);
+const radio = (name) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value ?? null;
+
+$("#save").addEventListener("click", async () => {
+  $("#msg").innerHTML = "";
+  if (!$("#consent").checked) { $("#msg").innerHTML = '<p class="err">Please confirm consent first.</p>'; return; }
+  const payload = {
+    participant_id: $("#pid").value.trim(), role: $("#role").value, lease: $("#lease").value,
+    address: $("#address").value.trim(),
+    manual_seconds: Math.round(elapsed(timers.manual)), app_seconds: Math.round(elapsed(timers.app)),
+    found_manual: checked("#found-manual"), found_app: checked("#found-app"), features: checked("#features"),
+    notes_manual: $("#notes-manual").value.trim(),
+    useful: radio("useful"), trust: radio("trust"), recommend: radio("recommend"), would_use: radio("would"),
+    caught: $("#caught").value.trim(), quote: $("#quote").value.trim(), change: $("#change").value.trim(),
+  };
+  const resp = await fetch("/api/study", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const body = await resp.json();
+  $("#msg").innerHTML = resp.ok ? `<p class="ok">Saved session ${body.participant_id}. <a href="/study/results">See all results</a></p>`
+                                : `<p class="err">${body.detail || "Could not save."}</p>`;
+});
+</script>
+</body>
+</html>

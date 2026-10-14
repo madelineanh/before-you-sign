@@ -6,6 +6,7 @@ the public servers. Nothing in this file calls an AI model.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import re
@@ -57,13 +58,17 @@ async def _get_json(url: str, params: dict[str, Any] | None = None) -> Any:
     path = CACHE_DIR / f"{key}.json"
     if path.exists() and time.time() - path.stat().st_mtime < CACHE_TTL_SECONDS:
         return json.loads(path.read_text(encoding="utf-8"))
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT, headers=HEADERS) as client:
-            resp = await client.get(url, params=params)
-            resp.raise_for_status()
-            data = resp.json()
-    except (httpx.HTTPError, ValueError) as exc:
-        raise SourceError(f"Could not reach {url.split('/')[2]}: {exc.__class__.__name__}") from exc
+    for attempt in (1, 2):  # public servers (FEMA especially) fail transiently; try once more
+        try:
+            async with httpx.AsyncClient(timeout=TIMEOUT, headers=HEADERS) as client:
+                resp = await client.get(url, params=params)
+                resp.raise_for_status()
+                data = resp.json()
+            break
+        except (httpx.HTTPError, ValueError) as exc:
+            if attempt == 2:
+                raise SourceError(f"Could not reach {url.split('/')[2]}: {exc.__class__.__name__}") from exc
+            await asyncio.sleep(2)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data), encoding="utf-8")
     return data
@@ -85,12 +90,17 @@ def _money(value: Any) -> int | None:
 
 
 async def geocode(address: str) -> dict[str, Any] | None:
-    """Match a street address with the US Census geocoder. Returns None if no match."""
+    """Match a street address with the US Census geocoder. Returns None if no match.
+
+    Uses 2020 Census geographies: they give the legal town (a "county subdivision" in Connecticut,
+    which is what the assessor data uses, not the postal city) and tract codes under Connecticut's
+    old county codes, which is what the Eviction Lab data uses.
+    """
     data = await _get_json(GEOCODER, {
         "address": address,
         "benchmark": "Public_AR_Current",
-        "vintage": "Current_Current",
-        "layers": "Census Tracts",
+        "vintage": "Census2020_Current",
+        "layers": "Census Tracts,County Subdivisions",
         "format": "json",
     })
     matches = data.get("result", {}).get("addressMatches", [])
@@ -100,12 +110,15 @@ async def geocode(address: str) -> dict[str, Any] | None:
     comp = m["addressComponents"]
     number = m["matchedAddress"].split(" ", 1)[0]
     tracts = m.get("geographies", {}).get("Census Tracts", [])
+    subdivisions = m.get("geographies", {}).get("County Subdivisions", [])
+    town = re.sub(r"\s+(town|city|borough)$", "", subdivisions[0]["NAME"]) if subdivisions else comp.get("city", "")
     return {
         "matched_address": m["matchedAddress"],
         "street_number": number,
         "street_name": comp.get("streetName", ""),
         "pre_direction": comp.get("preDirection", ""),
-        "city": comp.get("city", ""),
+        "city": comp.get("city", ""),  # postal city
+        "town": town,  # legal town, e.g. "East Hartford" for a Hartford mailing address
         "state": comp.get("state", ""),
         "zip": comp.get("zip", ""),
         "lat": m["coordinates"]["y"],
@@ -148,31 +161,60 @@ def _clean_parcel(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def find_parcels(street_number: str, street_name: str) -> list[dict[str, Any]]:
-    """Find New Haven assessor records for an address (all condo units included)."""
+DIRECTIONS = {"N": ["N", "NORTH", "NO"], "S": ["S", "SOUTH", "SO"], "E": ["E", "EAST"], "W": ["W", "WEST"]}
+
+
+async def find_parcels(street_number: str, street_name: str, town: str, pre_direction: str = "") -> list[dict[str, Any]]:
+    """Find a town's assessor records for an address (all condo units included).
+
+    Towns write addresses differently ("N MAIN ST", "NORTH MAIN STREET", "SO MAIN"), so several
+    spellings are tried in one query.
+    """
     num = _soql_quote(street_number.upper())
     street = _soql_quote(street_name.upper())
-    where = f"upper(property_city)='NEW HAVEN' AND upper(location) like '{num} {street} %'"
-    rows = await _get_json(PARCELS, {"$select": PARCEL_FIELDS, "$where": where, "$limit": 50})
+    town_q = f"upper(property_city)='{_soql_quote(town.upper())}'"
+    streets = [f"{d} {street}" for d in DIRECTIONS.get(pre_direction.upper(), [])] or [street]
+    exact = " OR ".join(f"upper(location) like '{num} {st} %'" for st in streets)
+    rows = await _get_json(PARCELS, {"$select": PARCEL_FIELDS, "$where": f"{town_q} AND ({exact})", "$limit": 50})
     if not rows:
         # Address ranges such as "360-370 TEMPLE ST".
-        where = (
-            "upper(property_city)='NEW HAVEN' AND "
-            f"(upper(location) like '%-{num} {street} %' OR upper(location) like '{num}-% {street} %')"
-        )
-        rows = await _get_json(PARCELS, {"$select": PARCEL_FIELDS, "$where": where, "$limit": 50})
+        ranges = " OR ".join(f"upper(location) like '%-{num} {st} %' OR upper(location) like '{num}-% {st} %'"
+                             for st in streets)
+        rows = await _get_json(PARCELS, {"$select": PARCEL_FIELDS, "$where": f"{town_q} AND ({ranges})", "$limit": 50})
     return [_clean_parcel(r) for r in rows]
 
 
+async def find_parcels_for(geo: dict[str, Any]) -> list[dict[str, Any]]:
+    """Assessor records for a geocoded address. The geocoder sometimes places a point just across a town
+    line (e.g. East Haven for a New Haven address), so if the legal town has no record, try the postal city.
+    Updates geo["town"] to the town where the record was found."""
+    towns = [geo["town"]]
+    if geo.get("city") and geo["city"].title() != geo["town"]:
+        towns.append(geo["city"].title())
+    for town in towns:
+        rows = await find_parcels(geo["street_number"], geo["street_name"], town, geo.get("pre_direction", ""))
+        if rows:
+            geo["town"] = town
+            return rows
+    return []
+
+
 async def owner_portfolio(owner: str) -> dict[str, Any]:
-    """Every New Haven parcel held under exactly this owner name."""
-    where = f"upper(property_city)='NEW HAVEN' AND upper(owner)='{_soql_quote(owner.upper())}'"
+    """Every Connecticut parcel held under exactly this owner name, with a count by town."""
+    where = f"upper(owner)='{_soql_quote(owner.upper())}'"
     summary = await _get_json(PARCELS, {
         "$select": "count(*) as parcels, sum(assessed_total) as total_assessed",
         "$where": where,
     })
+    by_town = await _get_json(PARCELS, {
+        "$select": "property_city, count(*) as parcels",
+        "$where": where,
+        "$group": "property_city",
+        "$order": "parcels DESC",
+        "$limit": 10,
+    })
     rows = await _get_json(PARCELS, {
-        "$select": "location,state_use_description,assessed_total",
+        "$select": "location,property_city,state_use_description,assessed_total",
         "$where": where,
         "$order": "assessed_total DESC",
         "$limit": 10,
@@ -180,10 +222,13 @@ async def owner_portfolio(owner: str) -> dict[str, Any]:
     s = summary[0] if summary else {}
     return {
         "owner": owner,
-        "new_haven_parcels": int(s.get("parcels", 0) or 0),
+        "connecticut_parcels": int(s.get("parcels", 0) or 0),
+        "towns": len(by_town),
+        "parcels_by_town": {r.get("property_city"): int(r.get("parcels", 0) or 0) for r in by_town},
         "total_assessed_value_usd": _money(s.get("total_assessed")) or 0,
         "largest_holdings": [
-            {"location": r.get("location"), "use": (r.get("state_use_description") or "").strip(),
+            {"location": r.get("location"), "town": r.get("property_city"),
+             "use": (r.get("state_use_description") or "").strip(),
              "assessed_value_usd": _money(r.get("assessed_total"))}
             for r in rows
         ],
@@ -266,7 +311,7 @@ def _strip_control(text: str, limit: int) -> str:
 
 async def nearby_311(lat: float, lng: float, street_number: str, street_name: str,
                      radius_m: int = 150, months: int = 24) -> dict[str, Any]:
-    """SeeClickFix (New Haven 311) reports inside a small box around the address."""
+    """SeeClickFix 311 reports inside a small box around the address (towns that use SeeClickFix)."""
     dlat = radius_m / 111_000
     dlng = radius_m / (111_000 * 0.75)  # cos(41.3 deg) is about 0.75
     after = (datetime.now(timezone.utc) - timedelta(days=30 * months)).strftime("%Y-%m-%dT00:00:00Z")
@@ -318,18 +363,10 @@ async def nearby_311(lat: float, lng: float, street_number: str, street_name: st
 # ------------------------------------------------------------------ evictions
 
 
-def _old_county_geoid(tract_geoid: str) -> str:
-    """Eviction Lab data uses CT's old county codes. New Haven tracts moved from county
-    09009 (New Haven County) to planning region 09170; the 6-digit tract code is unchanged."""
-    if tract_geoid.startswith("09170"):
-        return "09009" + tract_geoid[5:]
-    return tract_geoid
-
-
 async def tract_evictions(tract_geoid: str) -> dict[str, Any]:
     """Eviction filings in the address's census tract over the latest 52 weeks of data,
-    compared with every tract in New Haven County."""
-    geoid = _old_county_geoid(tract_geoid)
+    compared with every tract in the same county. Expects a 2020 tract GEOID (old county codes)."""
+    geoid = tract_geoid
     latest = await _get_json(EVICTIONS, {"$select": "max(week_date) as latest"})
     latest_date = datetime.fromisoformat(latest[0]["latest"][:19])
     start = (latest_date - timedelta(weeks=52)).strftime("%Y-%m-%dT00:00:00")

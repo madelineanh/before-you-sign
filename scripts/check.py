@@ -20,6 +20,7 @@ async def main() -> None:
     ap.add_argument("address")
     ap.add_argument("--lease", help="path to a lease PDF or .txt")
     ap.add_argument("--events", action="store_true", help="print every agent step")
+    ap.add_argument("--language", default="en", help="report language: en, es, pt, zh, ko, fr")
     args = ap.parse_args()
 
     lease_text = None
@@ -27,7 +28,7 @@ async def main() -> None:
         p = Path(args.lease)
         lease_text = extract_lease_text(p.name, p.read_bytes())
     job = new_job(args.address, has_lease=lease_text is not None)
-    await run_check(job, args.address, lease_text)
+    await run_check(job, args.address, lease_text, args.language)
 
     if args.events:
         for e in job.events:

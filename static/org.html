@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before You Sign · For organizations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root { --navy:#0b1f3a; --ink:#1a1f2b; --slate:#5b6472; --line:#e3e6eb; --bg:#f7f8fa; --brass:#a8854f; --green:#24603a; --red:#8f1d2c; --amber:#8a5a00;
+        --serif:"EB Garamond", Georgia, serif; --sans:"Inter", "Helvetica Neue", Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.bar { background: var(--navy); padding: 18px 0; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+.bar h1 { color: #fff; font-family: var(--serif); font-weight: 500; font-size: 26px; display: inline; margin: 0; }
+.bar a { color: #c8d2e0; font-size: 14px; margin-left: 18px; }
+.card { background: #fff; border: 1px solid var(--line); padding: 28px 32px; margin: 24px 0; box-shadow: 0 8px 24px rgba(11,31,58,.05); }
+h2 { font-family: var(--serif); font-weight: 500; color: var(--navy); font-size: 28px; margin: 0 0 8px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin: 0 0 8px; }
+label.f { display: block; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--slate); margin: 16px 0 6px; }
+textarea, select { width: 100%; font: inherit; padding: 11px 13px; border: 1px solid #c9ced6; border-radius: 2px; }
+select { width: auto; min-width: 240px; }
+button { font: inherit; font-weight: 600; border-radius: 2px; padding: 12px 22px; cursor: pointer; }
+.primary { background: var(--navy); color: #fff; border: 0; }
+.secondary { background: #fff; color: var(--navy); border: 1px solid #c9ced6; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+.muted { color: var(--slate); font-size: 14px; }
+.err { background: #f7ecee; color: var(--red); padding: 12px 16px; margin-top: 14px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 10px 0 20px; }
+.kpi { border: 1px solid var(--line); border-top: 3px solid var(--navy); padding: 14px; }
+.kpi b { display: block; font-family: var(--serif); font-size: 32px; color: var(--navy); font-weight: 500; }
+.kpi span { font-size: 13px; color: var(--slate); }
+#map { height: 360px; border: 1px solid var(--line); margin-bottom: 8px; }
+.pin { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,.35); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.f0 { background: var(--green); } .f1 { background: #b07d12; } .f2 { background: var(--red); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--slate); border-bottom: 1.5px solid var(--ink); padding: 6px 8px; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.flag { display: inline-block; font-size: 11.5px; background: #f7ecee; color: var(--red); padding: 1px 7px; margin: 1px 4px 1px 0; border-radius: 2px; }
+.ok { color: var(--green); font-size: 12.5px; }
+ol li { margin: 6px 0; }
+.progress { height: 6px; background: var(--line); margin: 14px 0 4px; } .progress i { display: block; height: 6px; background: var(--brass); width: 0; transition: width .3s; }
+@media (max-width: 760px) { .kpis { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap"><h1>Before You Sign · For organizations</h1><a href="/">Single property</a></div></div>
+<main class="wrap">
+  <section class="card">
+    <p class="eyebrow">Batch screening</p>
+    <h2>Screen a list of rental listings</h2>
+    <p class="muted">For housing nonprofits, university housing offices and tenant organizations. Paste up to 25 Connecticut addresses, one per line.
+      Each one is screened against public records (owner, portfolio, company status, 311 reports, eviction filings, flood zone), then the results are rolled up by landlord.</p>
+    <label class="f" for="addresses">Addresses (one per line)</label>
+    <textarea id="addresses" rows="9" placeholder="224 Wooster St, New Haven, CT"></textarea>
+    <div class="row">
+      <button class="secondary" type="button" id="sample">Load a sample batch</button>
+      <label for="csv" class="secondary" style="padding:12px 22px;border:1px solid #c9ced6;cursor:pointer;font-weight:600;color:var(--navy)">Upload CSV</label>
+      <input type="file" id="csv" accept=".csv,.txt" hidden>
+      <select id="language">
+        <option value="en">English</option><option value="es">Español</option><option value="pt">Português</option>
+        <option value="zh">简体中文</option><option value="ko">한국어</option><option value="fr">Français</option>
+      </select>
+      <button class="primary" id="run">Screen these listings</button>
+    </div>
+    <div class="progress" id="progress" hidden><i></i></div>
+    <p class="muted" id="status"></p>
+    <div id="error"></div>
+  </section>
+  <div id="out"></div>
+</main>
+<script>
+const SAMPLE = ["224 Wooster St, New Haven, CT", "43 William St, New Haven, CT", "37 William St, New Haven, CT", "32 Clinton Ave, New Haven, CT",
+  "30 Pardee St, New Haven, CT", "75 Lenox St, New Haven, CT", "151 Howard Ave, New Haven, CT", "786 George St, New Haven, CT",
+  "157 Howard Ave, New Haven, CT", "31 Chapel St, New Haven, CT", "100 Howe St, New Haven, CT", "114 Prospect St, East Hartford, CT"];
+const $ = (s) => document.querySelector(s);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const pretty = (a) => { const p = String(a || "").split(",").map((x) => x.trim()); const zip = /^\d{5}$/.test(p.at(-1)) ? p.pop() : ""; const st = p.length > 2 ? p.pop() : "";
+  return [p.join(", ").toLowerCase().replace(/\b([a-z])/g, (c) => c.toUpperCase()), [st, zip].filter(Boolean).join(" ")].filter(Boolean).join(", "); };
+
+$("#sample").addEventListener("click", () => { $("#addresses").value = SAMPLE.join("\n"); });
+$("#csv").addEventListener("change", async (e) => {
+  const text = await e.target.files[0].text();
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // Use the "address" column if there is a header, otherwise the whole line.
+  const header = lines[0].toLowerCase().split(",");
+  const col = header.findIndex((h) => h.replace(/"/g, "").trim() === "address");
+  const rows = col >= 0 ? lines.slice(1).map((l) => (l.match(/("[^"]*"|[^,]+)/g) || [])[col] || "").map((x) => x.replace(/"/g, "").trim()) : lines;
+  $("#addresses").value = rows.filter(Boolean).slice(0, 25).join("\n");
+});
+
+let lastResult = null;
+$("#run").addEventListener("click", async () => {
+  $("#error").innerHTML = ""; $("#out").innerHTML = "";
+  const addresses = $("#addresses").value.split("\n").map((x) => x.trim()).filter(Boolean);
+  $("#run").disabled = true;
+  try {
+    const resp = await fetch("/api/org", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ addresses, language: $("#language").value }) });
+    const body = await resp.json();
+    if (!resp.ok) throw new Error(body.detail || "Something went wrong.");
+    $("#progress").hidden = false; $("#progress i").style.width = "0";
+    poll(body.job_id, 0, addresses.length, 0);
+  } catch (ex) { $("#error").innerHTML = `<p class="err">${esc(ex.message)}</p>`; $("#run").disabled = false; }
+});
+
+async function poll(id, since, total, done) {
+  const b = await (await fetch(`/api/jobs/${id}?since=${since}`)).json();
+  b.events.forEach((e) => { if (e.kind === "screened") done += 1; if (e.kind === "status") $("#status").textContent = e.message; });
+  $("#progress i").style.width = `${Math.round(100 * done / total)}%`;
+  if (b.status === "running") { setTimeout(() => poll(id, b.next, total, done), 1000); return; }
+  $("#run").disabled = false;
+  if (b.status !== "done") { $("#error").innerHTML = `<p class="err">${esc(b.error)}</p>`; return; }
+  $("#status").textContent = `Done in ${b.result.seconds} seconds · AI cost $${b.result.usage.cost_usd.toFixed(4)} (one summary call; the screening itself uses only free public data).`;
+  lastResult = b.result; render(b.result);
+}
+
+function render(r) {
+  const R = r.rollup, F = r.flag_text, S = r.summary;
+  const flagBadges = (flags) => flags.length ? flags.map((f) => `<span class="flag">${esc(F[f] || f)}</span>`).join("") : '<span class="ok">No flags</span>';
+  const owners = R.owners.map((o) => `<tr><td><b>${esc(o.owner)}</b>${o.company_status ? `<br><span class="muted">Registry: ${esc(o.company_status)}${o.principals && o.principals.length ? ` · principals: ${esc(o.principals.join(", "))}` : ""}</span>` : ""}</td>
+      <td>${o.listings}</td><td>${o.flagged_listings}</td><td>${o.owner_ct_parcels ?? "–"}</td>
+      <td>${Object.entries(o.flags).map(([f, n]) => `<span class="flag">${esc(F[f] || f)} ×${n}</span>`).join("") || '<span class="ok">No flags</span>'}</td></tr>`).join("");
+  const rows = r.rows.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(pretty(x.address || x.input))}${x.status !== "done" ? `<br><span class="muted">${esc(x.error || x.status)}</span>` : ""}</td>
+      <td>${esc(x.owner || "–")}</td><td>${x.owner_ct_parcels ?? "–"}</td><td>${x.reports_at_address ?? "–"}</td><td>${flagBadges(x.flags || [])}</td></tr>`).join("");
+  $("#out").innerHTML = `
+    <section class="card"><p class="eyebrow">Summary for staff</p><h2>${esc(S.headline)}</h2><p>${esc(S.summary)}</p>
+      <ol>${S.priorities.map((p) => `<li>${esc(p)}</li>`).join("")}</ol>
+      <div class="kpis">
+        <div class="kpi"><b>${R.addresses_screened}/${R.addresses_submitted}</b><span>addresses screened</span></div>
+        <div class="kpi"><b>${R.listings_with_flags}</b><span>listings with at least one flag</span></div>
+        <div class="kpi"><b>${R.distinct_owners}</b><span>distinct owners of record</span></div>
+        <div class="kpi"><b>$${r.usage.cost_usd.toFixed(4)}</b><span>AI cost for the whole batch</span></div>
+      </div>
+      <div id="map"></div><p class="muted">Pins show the number of flags at each address.</p>
+      <div class="row"><button class="secondary" id="csv-out">Download results (CSV)</button></div>
+    </section>
+    <section class="card"><p class="eyebrow">By landlord</p><h2>Owners of record</h2>
+      <table><thead><tr><th>Owner</th><th>Listings here</th><th>Flagged</th><th>CT parcels owned</th><th>Flags</th></tr></thead><tbody>${owners}</tbody></table></section>
+    <section class="card"><p class="eyebrow">By listing</p><h2>Every address</h2>
+      <table><thead><tr><th>#</th><th>Address</th><th>Owner</th><th>CT parcels</th><th>311 at address</th><th>Flags</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="muted" style="margin-top:12px">Flags are prompts for review based on public records, not findings of wrongdoing.</p></section>`;
+  const pts = r.rows.filter((x) => x.lat && x.lng);
+  if (window.L && pts.length) {
+    const map = L.map("map", { scrollWheelZoom: false }).setView([41.6, -72.7], 9);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+    pts.forEach((x) => {
+      const n = x.flags.length, cls = n === 0 ? "f0" : n === 1 ? "f1" : "f2";
+      L.marker([x.lat, x.lng], { icon: L.divIcon({ className: "", html: `<div class="pin ${cls}">${n}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] }) })
+        .addTo(map).bindPopup(`<b>${esc(pretty(x.address))}</b><br>${esc(x.owner || "No assessor record")}<br>${(x.flags || []).map((f) => esc(F[f] || f)).join("<br>") || "No flags"}`);
+    });
+    const fit = () => { map.invalidateSize(); map.fitBounds(L.latLngBounds(pts.map((x) => [x.lat, x.lng])), { padding: [30, 30], maxZoom: 15 }); };
+    fit(); setTimeout(fit, 300);  // refit once the page has finished laying out
+  }
+  $("#csv-out").addEventListener("click", () => {
+    const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [["address", "town", "owner", "owner_ct_parcels", "company_status", "reports_at_address", "flood_zone", "flags"].join(",")]
+      .concat(r.rows.map((x) => [x.address || x.input, x.town, x.owner, x.owner_ct_parcels, x.company_status, x.reports_at_address, x.flood_zone,
+        (x.flags || []).map((f) => F[f] || f).join("; ")].map(cell).join(",")));
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
+    a.download = "before-you-sign-screening.csv"; a.click();
+  });
+}
+</script>
+</body>
+</html>

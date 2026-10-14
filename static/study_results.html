@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before You Sign · Study results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --navy:#0b1f3a; --ink:#1a1f2b; --slate:#5b6472; --line:#e3e6eb; --bg:#f7f8fa; --brass:#a8854f; --green:#24603a; --red:#8f1d2c;
+        --serif:"EB Garamond", Georgia, serif; --sans:"Inter", "Helvetica Neue", Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.bar { background: var(--navy); color: #fff; padding: 18px 0; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+.bar h1 { color: #fff; font-family: var(--serif); font-weight: 500; font-size: 26px; display: inline; margin: 0; }
+.bar a { color: #c8d2e0; font-size: 14px; margin-left: 18px; }
+.card { background: #fff; border: 1px solid var(--line); padding: 28px 32px; margin: 24px 0; }
+h2 { font-family: var(--serif); font-weight: 500; color: var(--navy); font-size: 26px; margin: 0 0 12px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.kpi { border: 1px solid var(--line); border-top: 3px solid var(--navy); padding: 14px; }
+.kpi b { display: block; font-family: var(--serif); font-size: 32px; color: var(--navy); font-weight: 500; }
+.kpi span { font-size: 13px; color: var(--slate); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--slate); border-bottom: 1.5px solid var(--ink); padding: 6px 8px; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.bar-cell { display: flex; align-items: center; gap: 8px; }
+.meter { height: 8px; background: var(--line); flex: 1; position: relative; }
+.meter i { position: absolute; left: 0; top: 0; bottom: 0; }
+blockquote { margin: 10px 0; padding: 8px 16px; border-left: 3px solid var(--brass); font-family: var(--serif); font-size: 19px; }
+blockquote cite { display: block; font-family: var(--sans); font-size: 12px; color: var(--slate); font-style: normal; }
+.muted { color: var(--slate); }
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap"><h1>Study results</h1><a href="/study">New session</a><a href="/api/study?download=1">Download JSON</a></div></div>
+<main class="wrap" id="out"><p class="muted" style="margin-top:24px">Loading…</p></main>
+<script>
+const LABELS = { owner: "Owner of record", llc_people: "People behind the LLC", portfolio: "Owner's other properties",
+  complaints: "311 / code complaints", evictions: "Eviction activity", flood: "Flood risk",
+  lease_issues: "Illegal or risky lease clauses", questions: "Questions to ask the landlord" };
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+
+fetch("/api/study").then((r) => r.json()).then(({ sessions }) => {
+  if (!sessions.length) { document.querySelector("#out").innerHTML = '<p class="muted" style="margin-top:24px">No sessions yet. <a href="/study">Start one</a>.</p>'; return; }
+  const n = sessions.length;
+  const man = sessions.map((s) => s.manual_seconds).filter((x) => x > 0);
+  const app = sessions.map((s) => s.app_seconds).filter((x) => x > 0);
+  const saved = median(man) && median(app) ? Math.round(100 * (1 - median(app) / median(man))) : null;
+  const nums = (k) => sessions.map((s) => s[k]).filter((x) => x !== null && x !== undefined).map(Number);
+  const rec = nums("recommend");
+  const nps = rec.length ? Math.round(100 * (rec.filter((x) => x >= 9).length - rec.filter((x) => x <= 6).length) / rec.length) : null;
+  const yes = sessions.filter((s) => s.would_use === "Yes").length;
+  const itemRows = Object.entries(LABELS).map(([k, label]) => {
+    const m = sessions.filter((s) => s.found_manual.includes(k)).length;
+    const a = sessions.filter((s) => s.found_app.includes(k)).length;
+    const only = sessions.filter((s) => s.found_app.includes(k) && !s.found_manual.includes(k)).length;
+    const bar = (v, c) => `<div class="bar-cell"><div class="meter"><i style="width:${100 * v / n}%;background:${c}"></i></div>${v}/${n}</div>`;
+    return `<tr><td>${label}</td><td>${bar(m, "#8a929e")}</td><td>${bar(a, "#0b1f3a")}</td><td>${only}</td></tr>`;
+  }).join("");
+  const missedByHand = sessions.reduce((t, s) => t + s.found_app.filter((k) => !s.found_manual.includes(k)).length, 0);
+  document.querySelector("#out").innerHTML = `
+    <section class="card"><h2>Summary · ${n} participant${n === 1 ? "" : "s"}</h2>
+      <div class="kpis">
+        <div class="kpi"><b>${mmss(median(man))} → ${mmss(median(app))}</b><span>median time by hand → with the app</span></div>
+        <div class="kpi"><b>${saved === null ? "–" : saved + "%"}</b><span>less time with the app (medians)</span></div>
+        <div class="kpi"><b>${missedByHand}</b><span>items the app surfaced that people had missed by hand (all sessions)</span></div>
+        <div class="kpi"><b>${mean(nums("useful")).toFixed(1)} / 5</b><span>usefulness · trust ${mean(nums("trust")).toFixed(1)} / 5</span></div>
+      </div>
+      <p class="muted" style="margin:14px 0 0">Would use before signing: ${yes} of ${n}. Net promoter score: ${nps === null ? "–" : nps} (from ${rec.length} rating${rec.length === 1 ? "" : "s"}).</p>
+    </section>
+    <section class="card"><h2>What people found</h2>
+      <table><thead><tr><th>Item</th><th>Found by hand</th><th>Shown by the app</th><th>App only</th></tr></thead><tbody>${itemRows}</tbody></table>
+    </section>
+    <section class="card"><h2>In their words</h2>
+      ${sessions.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}<cite>${esc(s.participant_id)} · ${esc(s.role)}</cite></blockquote>`).join("") || '<p class="muted">No quotes yet.</p>'}
+      ${sessions.filter((s) => s.change).length ? `<h2 style="margin-top:20px;font-size:20px">Suggested changes</h2><ul>${sessions.filter((s) => s.change).map((s) => `<li>${esc(s.change)} <span class="muted">(${esc(s.participant_id)})</span></li>`).join("")}</ul>` : ""}
+    </section>
+    <section class="card"><h2>Sessions</h2>
+      <table><thead><tr><th>ID</th><th>Role</th><th>Lease</th><th>By hand</th><th>App</th><th>Useful</th><th>Trust</th><th>Recommend</th><th>Use again</th><th>Features tried</th></tr></thead><tbody>
+      ${sessions.map((s) => `<tr><td>${esc(s.participant_id)}</td><td>${esc(s.role)}</td><td>${esc(s.lease)}</td><td>${mmss(s.manual_seconds)}</td><td>${mmss(s.app_seconds)}</td>
+        <td>${s.useful ?? "–"}</td><td>${s.trust ?? "–"}</td><td>${s.recommend ?? "–"}</td><td>${esc(s.would_use ?? "–")}</td><td>${esc(s.features.join(", "))}</td></tr>`).join("")}
+      </tbody></table>
+    </section>`;
+});
+</script>
+</body>
+</html>
