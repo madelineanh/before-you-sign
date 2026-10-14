@@ -73,7 +73,7 @@ Then open **http://127.0.0.1:8000** in your browser. Stop the app with `Ctrl+C`.
 4. To compare apartments instead, switch to the **Compare a shortlist** tab, enter 2–5 addresses (and rents), and click **Compare apartments**. Click a pin or **View full report** to open any apartment's report.
 5. Under any report with problems, open the **Negotiation coach** to draft a letter or practice the conversation.
    To check a listing you found online, use the **Check a listing for scams** tab (two sample listings are included). Organizations can use **For organizations** in the top menu.
-6. Read the verification report: the verdict, findings with clickable sources, questions for the landlord, links to the official sex-offender registries, and the scope and limitations. Open **Methodology and cost** for this run's measured tokens, cost and safeguards. Use **Print or save as PDF** to keep a copy.
+6. Read the verification report: the verdict, findings with clickable sources, questions for the landlord, links to the official sex-offender registries, and the scope and limitations. Open **How this report was made** for the sources consulted and any safeguards applied. (Measured tokens and cost for every run are logged in `logs/runs.jsonl`.) Use **Print or save as PDF** to keep a copy.
 
 The sample leases are fictional and are not tied to any example address.
 

@@ -74,26 +74,17 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spac
 .hero-note { color: #aeb9c8; font-size: 13.5px; margin: 16px 0 0; }
 .guide { list-style: none; margin: 0 0 22px; padding: 0 0 18px; display: flex; gap: 26px; flex-wrap: wrap; border-bottom: 1px solid var(--hairline); font-size: 14px; color: var(--slate); }
 .guide b { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; align-items: center; justify-content: center; margin-right: 6px; }
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 26px 0 30px; }
-.stats div { border-top: 3px solid var(--brass); background: var(--paper); border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); padding: 16px 18px; }
-.stats b { display: block; font-family: var(--serif); font-size: 38px; color: var(--navy); font-weight: 500; line-height: 1.1; }
-.stats span { font-size: 14px; color: var(--slate); }
-.team-diagram { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 34px; }
-.team-diagram .node { background: var(--paper); border: 1px solid var(--navy); padding: 12px 18px; text-align: center; font-weight: 600; color: var(--navy); max-width: 620px; width: 100%; }
-.team-diagram .node span { display: block; font-weight: 400; font-size: 13px; color: var(--slate); margin-top: 2px; }
-.team-diagram .lead { background: var(--navy); color: #fff; } .team-diagram .lead span { color: #c5cfdc; }
-.team-diagram .code { background: var(--blue-soft); border-style: dashed; }
-.team-diagram .check { border-color: var(--red); color: var(--red); background: var(--red-soft); }
-.team-diagram .specialists { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-.team-diagram .specialists .node { max-width: none; }
-.team-diagram .arrow { color: var(--brass); font-size: 20px; line-height: 1; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-top: 36px; }
+.step span { display: inline-flex; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--brass); color: var(--brass); font-family: var(--serif); font-size: 19px; align-items: center; justify-content: center; }
+.step h3 { font-size: 23px; color: var(--navy); margin: 14px 0 8px; }
+.step p { margin: 0; color: var(--slate); font-size: 15px; }
 .secnav { position: sticky; top: 48px; z-index: 900; background: rgba(247,248,250,.97); border-bottom: 1px solid var(--hairline); margin: 0 0 20px; padding: 10px 0; }
 .secnav div { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
 .secnav a { white-space: nowrap; font-size: 14px; color: var(--slate); text-decoration: none; padding: 6px 14px; border: 1px solid var(--hairline); border-radius: 999px; background: #fff; }
 .secnav a:hover { color: var(--navy); border-color: var(--navy); }
 .secnav a.active { color: #fff; background: var(--navy); border-color: var(--navy); }
 #report section.card, #compare-result section.card { scroll-margin-top: 120px; }
-#form-card, #how { scroll-margin-top: 60px; }
+#form-card, #how { scroll-margin-top: 72px; }
 .sample-banner { background: var(--amber-soft); border-left: 3px solid var(--brass); padding: 12px 16px; margin: 0 0 18px; font-size: 14.5px; }
 
 /* ---------- cards ---------- */
@@ -285,7 +276,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
   .nav-links a { display: none; }
   .hero { padding: 48px 0 130px; }
   .hero h1 { font-size: 40px; }
-  .features, .stats, .team-diagram .specialists { grid-template-columns: 1fr; }
+  .features, .steps { grid-template-columns: 1fr; }
   .card { padding: 26px 22px; }
   .cols, .assurances { grid-template-columns: 1fr; }
   .assurances div { border-right: 0; border-bottom: 1px solid var(--hairline); }
@@ -494,29 +485,14 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
 <section class="section" id="how">
   <div class="wrap">
     <p class="eyebrow">How it works</p>
-    <h2>A team of AI agents, checked by code.</h2>
-    <div class="stats">
-      <div><b>10</b><span>specialized AI agents</span></div>
-      <div><b>15</b><span>tools on public data and Connecticut law</span></div>
-      <div><b>100%</b><span>of findings cited and fact-checked in code</span></div>
-    </div>
-    <div class="team-diagram">
-      <div class="node code">Intake <span>geocode · Connecticut only · strips hidden instructions</span></div>
-      <div class="arrow">↓</div>
-      <div class="node lead">Lead Advisor <span>assigns the specialists in parallel and writes your report</span></div>
-      <div class="arrow">↓</div>
-      <div class="specialists">
-        <div class="node">Landlord Investigator <span>assessor records · statewide portfolio · CT business registry and principals</span></div>
-        <div class="node">Neighborhood Scout <span>311 reports · eviction filings · FEMA flood zone</span></div>
-        <div class="node">Lease Reviewer <span>every clause vs. 20 Connecticut statutory rules, with calculators</span></div>
-      </div>
-      <div class="arrow">↓</div>
-      <div class="node code check">Fact check (code) <span>every finding must cite real evidence; invented numbers and misquotes are rejected</span></div>
-    </div>
-    <div class="cols">
-      <div class="col"><h3>Comparison Advisor</h3><p>Ranks your shortlist by a published risk score computed in code, and explains the tradeoffs.</p></div>
-      <div class="col"><h3>Listing Analyst</h3><p>Checks a pasted listing against the FTC's rental-scam warning signs and the owner of record.</p></div>
-      <div class="col"><h3>Negotiation coach</h3><p>A letter writer, a practice landlord (reasonable, busy or tough) and a coach who scores every message.</p></div>
+    <h2>Three steps to signing with confidence.</h2>
+    <div class="steps">
+      <div class="step"><span>1</span><h3>Tell us the apartment</h3>
+        <p>Enter the address. Add your lease if you have it, paste a listing you found online, or compare a few apartments at once.</p></div>
+      <div class="step"><span>2</span><h3>We check the records and the law</h3>
+        <p>Who really owns the building, what else they own, complaints at and near the address, local eviction filings, flood risk, and every lease clause against Connecticut tenant law.</p></div>
+      <div class="step"><span>3</span><h3>Get a clear report and next steps</h3>
+        <p>A plain-language verdict, the questions to ask the landlord, and a ready-to-send letter asking for any fixes, in your language.</p></div>
     </div>
     <div class="assurances">
       <div><strong>Cited, not guessed</strong><span>Every finding links to the public record or statute it comes from.</span></div>

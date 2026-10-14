@@ -127,7 +127,7 @@ async function poll(id, since, total, done) {
   if (b.status === "running") { setTimeout(() => poll(id, b.next, total, done), 1000); return; }
   $("#run").disabled = false;
   if (b.status !== "done") { $("#error").innerHTML = `<p class="err">${esc(b.error)}</p>`; return; }
-  $("#status").textContent = `Done in ${b.result.seconds} seconds · AI cost $${b.result.usage.cost_usd.toFixed(4)} (one summary call; the screening itself uses only free public data).`;
+  $("#status").textContent = `Done in ${b.result.seconds} seconds.`;
   lastResult = b.result; render(b.result);
 }
 
@@ -147,7 +147,7 @@ function render(r) {
         <div class="kpi"><b>${R.addresses_screened}/${R.addresses_submitted}</b><span>addresses screened</span></div>
         <div class="kpi"><b>${R.listings_with_flags}</b><span>listings with at least one flag</span></div>
         <div class="kpi"><b>${R.distinct_owners}</b><span>distinct owners of record</span></div>
-        <div class="kpi"><b>$${r.usage.cost_usd.toFixed(4)}</b><span>AI cost for the whole batch</span></div>
+        <div class="kpi"><b>${new Set(r.rows.filter((x) => x.town).map((x) => x.town)).size}</b><span>towns covered</span></div>
       </div>
       <div id="map"></div><p class="muted">Pins show the number of flags at each address.</p>
       <div class="row"><button class="secondary" id="csv-out">Download results (CSV)</button></div>

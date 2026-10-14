@@ -47,6 +47,7 @@ class CheckState:
     lease_text: str | None = None
     known_owners: set[str] = field(default_factory=set)
     known_business_ids: set[str] = field(default_factory=set)
+    business_names: dict[str, str] = field(default_factory=dict)
     specialist_calls: dict[str, int] = field(default_factory=dict)
     usage_by_agent: dict[str, dict[str, int]] = field(default_factory=dict)
     safety_events: list[dict[str, Any]] = field(default_factory=list)
@@ -273,6 +274,7 @@ async def search_business_registry(ctx: RunContext[CheckState], company_name: st
         return {"result": "No matching company in the Connecticut business registry."}
     for m in matches:
         s.known_business_ids.add(m["business_id"])
+        s.business_names[m["business_id"]] = m["name"]
     eid = s.ledger.add(f"CT Business Registry search: {company_name}", matches, sources.SOURCE_PAGES["business"])
     return {"evidence_id": eid, "matches": matches}
 
@@ -288,7 +290,8 @@ async def get_company_principals(ctx: RunContext[CheckState], business_id: str) 
         people = await sources.business_principals(business_id)
     except sources.SourceError as exc:
         return _source_error(s, "The CT business registry", exc)
-    eid = s.ledger.add(f"CT Business Registry principals for business {business_id}", people, sources.SOURCE_PAGES["principals"])
+    company = s.business_names.get(business_id, "the company")
+    eid = s.ledger.add(f"CT Business Registry: principals of {company}", people, sources.SOURCE_PAGES["principals"])
     return {"evidence_id": eid, "principals": people or "No principals on file."}
 
 

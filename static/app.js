@@ -232,8 +232,22 @@ function stripIds(text) {
   return String(text).replace(/\s*[\[(](?:CT-[\w-]+|E\d+|LEASE)(?:[,;\s]+(?:CT-[\w-]+|E\d+|LEASE))*[\])]/g, "");
 }
 
-function money(x) { return `$${Number(x).toFixed(4)}`; }
 function n(x) { return Number(x || 0).toLocaleString(); }
+
+// Collapse many statute and calculator entries into single readable lines.
+function groupedSources(evidence, T) {
+  const statutes = [], calculators = [], other = new Set();
+  evidence.forEach((e) => {
+    if (e.id === "LEASE") other.add(T.yourLease);
+    else if (e.id.startsWith("CT-")) statutes.push(e.source.split(":")[0].replace("Conn. Gen. Stat. ", ""));
+    else if (/calculator|check \(/i.test(e.source)) calculators.push(e.source.split(" (")[0]);
+    else other.add(e.source.replace(/ principals for business \w+$/, " principals"));
+  });
+  const out = [...other];
+  if (statutes.length) out.push(`Connecticut General Statutes ${[...new Set(statutes)].join(", ")}`);
+  if (calculators.length) out.push(`Built-in checks: ${[...new Set(calculators)].join(", ")}`);
+  return out;
+}
 
 function findingsHtml(findings, evidence, T) {
   return findings.map((f) => {
@@ -246,7 +260,8 @@ function findingsHtml(findings, evidence, T) {
     }).map((id) => {
       const e = evidence[id];
       if (!e) return `<span>${esc(id)}</span>`;
-      const label = id === "LEASE" ? T.yourLease : id === "LISTING" ? T.category.listing : e.source;
+      const label = id === "LEASE" ? T.yourLease : id === "LISTING" ? T.category.listing
+        : e.source.replace(/ principals for business \w+$/, " principals");
       return e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" title="${esc(id)}">${esc(label)}</a>`
                    : `<span title="${esc(id)}">${esc(label)}</span>`;
     }).join("");
@@ -274,10 +289,6 @@ function renderReport(result, jobId, { scroll = true } = {}) {
 
   const gaps = [...(r.gaps || [])];
   const safety = result.safety_events || [];
-  const u = result.usage;
-  const usageRows = u.by_agent.map((a) => `<tr><td>${esc(shown(a.agent))}</td><td>${n(a.requests)}</td><td>${n(a.input_tokens)}</td>
-      <td>${n(a.cache_read_tokens)}</td><td>${n(a.output_tokens)}</td><td>${money(a.cost_usd)}</td></tr>`).join("");
-  const t = u.totals;
 
   const when = new Date().toLocaleString(T.locale, { dateStyle: "long", timeStyle: "short" });
 
@@ -327,16 +338,12 @@ function renderReport(result, jobId, { scroll = true } = {}) {
     <section class="card" id="r-method">
       <details class="behind">
         <summary>${T.method}</summary>
-        <p class="small">Model: ${esc(u.model)}. All figures below are measured from this review.</p>
-        <table>
-          <thead><tr><th>Review</th><th>AI calls</th><th>Input tokens</th><th>Cached</th><th>Output tokens</th><th>Cost</th></tr></thead>
-          <tbody>${usageRows}
-            <tr class="total"><td>Total</td><td>${n(t.requests)}</td><td>${n(t.input_tokens)}</td><td>${n(t.cache_read_tokens)}</td>
-            <td>${n(t.output_tokens)}</td><td>${money(t.cost_usd)}</td></tr></tbody>
-        </table>
-        <h3 style="color:var(--navy)">Safeguards applied</h3>
-        ${safety.length ? `<ul class="safety-list">${safety.map((s) => `<li><b>${esc(shown(s.agent))}:</b> ${esc(s.detail)}</li>`).join("")}</ul>`
-                        : '<p class="small">No safeguards were triggered during this review.</p>'}
+        <p>${esc(T.methodText)}</p>
+        <h3 style="color:var(--navy);font-size:19px">${esc(T.sourcesUsed)}</h3>
+        <ul class="safety-list">${groupedSources(result.evidence || [], T).map((src) => `<li>${esc(src)}</li>`).join("")}</ul>
+        <h3 style="color:var(--navy);font-size:19px">${esc(T.safeguards)}</h3>
+        ${safety.length ? `<ul class="safety-list">${safety.map((s) => `<li>${esc(s.detail)}</li>`).join("")}</ul>`
+                        : `<p class="small">${esc(T.noSafeguards)}</p>`}
       </details>
     </section>
 
@@ -478,11 +485,10 @@ function renderCompare(result, jobId) {
   }).join("");
 
   const failed = result.apartments.filter((a) => a.status !== "done");
-  const u = result.usage.totals;
 
   $("#compare-result").innerHTML = sectionNav([["c-ranking", T.rankingTab], ["c-rec", T.recommendation]]) + `
     <section class="card" id="c-ranking">
-      <div class="card-head"><h2>${T.comparison}</h2><p>${result.apartments.length} · ${money(u.cost_usd)} · ${result.seconds}s</p></div>
+      <div class="card-head"><h2>${T.comparison}</h2></div>
       <div id="map"></div>
       ${rows}
       <p class="small" style="margin-top:14px">${esc(T.riskScore)}: ${esc(result.scoring)}</p>

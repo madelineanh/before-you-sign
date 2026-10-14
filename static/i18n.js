@@ -2,6 +2,7 @@
 // by the Lead Advisor in the chosen language; these are the fixed parts of the page around it.
 const I18N = {
   en: {
+    methodText: "This report was prepared by AI agents using official public records and Connecticut law. Before anything was shown to you, every finding was checked against the source it cites. It is a screening tool, not legal advice.", sourcesUsed: "Sources consulted", safeguards: "Safeguards applied", noSafeguards: "No safeguards were needed during this review.",
     summaryTab: "Summary", rankingTab: "Ranking & map",
     listingUI: {"eyebrow": "Listing check", "risk": {"High": "High scam risk", "Elevated": "Elevated scam risk", "Low": "Low scam risk"}, "nextSteps": "Before you pay anything", "ftc": "Report a suspected scam to the FTC", "fullCheck": "Run a full verification of this address"},
     coachUI: {"title": "Negotiation coach", "intro": "Turn these findings into action: get a ready-to-send letter asking the landlord for each fix, or practice the conversation first.", "draftLetter": "Draft a letter to the landlord", "practice": "Practice the conversation", "letterNote": "The letter is in English because it goes to the landlord. Review it before sending.", "copy": "Copy letter", "copied": "Copied", "choose": "Choose your practice landlord", "personas": {"reasonable": ["Reasonable", "Agrees when you ask clearly and give a reason"], "busy": ["Busy", "Needs the exact clause and the exact change"], "tough": ["Tough", "Pushes back; wants the clause, the change and the law"]}, "won": "Issues won", "turnsLeft": "Turns left", "placeholder": "Write what you'd say to the landlord…", "send": "Send", "you": "You", "landlord": "Landlord", "coach": "Coach", "allWon": "You negotiated every fix. Now ask for the revised lease in writing.", "restart": "Start over", "note": "Practice only: the AI landlord is a role-play character, not your landlord."},
@@ -19,10 +20,11 @@ const I18N = {
     registryTitle: "Sex offender registries",
     registryText: "We link to the official registries rather than searching them on your behalf. The official sites are the most current, and their records should be read with the context and cautions those sites provide.",
     ctReg: "Connecticut Sex Offender Registry", natReg: "National Sex Offender Public Website (U.S. DOJ)",
-    limits: "Scope and limitations", method: "Methodology and cost",
+    limits: "Scope and limitations", method: "How this report was made",
     print: "Print or save as PDF", newCheck: "New verification",
   },
   es: {
+    methodText: "Este informe fue preparado por agentes de IA a partir de registros públicos oficiales y la ley de Connecticut. Antes de mostrárselo, cada hallazgo se verificó con la fuente que cita. Es una herramienta de evaluación, no asesoría legal.", sourcesUsed: "Fuentes consultadas", safeguards: "Medidas de protección aplicadas", noSafeguards: "No fue necesario aplicar medidas de protección en esta revisión.",
     summaryTab: "Resumen", rankingTab: "Clasificación y mapa",
     listingUI: {"eyebrow": "Revisión del anuncio", "risk": {"High": "Riesgo alto de estafa", "Elevated": "Riesgo elevado de estafa", "Low": "Riesgo bajo de estafa"}, "nextSteps": "Antes de pagar nada", "ftc": "Denuncie una posible estafa ante la FTC", "fullCheck": "Verificar a fondo esta dirección"},
     coachUI: {"title": "Asesor de negociación", "intro": "Convierta estos hallazgos en acción: obtenga una carta lista para enviar que pida cada corrección al arrendador, o practique primero la conversación.", "draftLetter": "Redactar una carta al arrendador", "practice": "Practicar la conversación", "letterNote": "La carta está en inglés porque va dirigida al arrendador. Revísela antes de enviarla.", "copy": "Copiar carta", "copied": "Copiada", "choose": "Elija su arrendador de práctica", "personas": {"reasonable": ["Razonable", "Acepta si usted lo pide con claridad y da una razón"], "busy": ["Ocupado", "Necesita la cláusula exacta y el cambio exacto"], "tough": ["Exigente", "Se resiste; quiere la cláusula, el cambio y la ley"]}, "won": "Puntos logrados", "turnsLeft": "Turnos restantes", "placeholder": "Escriba lo que le diría al arrendador…", "send": "Enviar", "you": "Usted", "landlord": "Arrendador", "coach": "Asesor", "allWon": "Logró todas las correcciones. Ahora pida el contrato revisado por escrito.", "restart": "Empezar de nuevo", "note": "Solo práctica: el arrendador de IA es un personaje, no su arrendador real."},
@@ -40,10 +42,11 @@ const I18N = {
     registryTitle: "Registros de delincuentes sexuales",
     registryText: "Enlazamos los registros oficiales en lugar de consultarlos por usted. Los sitios oficiales son los más actualizados, y sus datos deben leerse con el contexto y las advertencias que ofrecen esos sitios.",
     ctReg: "Registro de Delincuentes Sexuales de Connecticut", natReg: "Sitio Web Público Nacional de Delincuentes Sexuales (Departamento de Justicia de EE. UU.)",
-    limits: "Alcance y limitaciones", method: "Metodología y costo",
+    limits: "Alcance y limitaciones", method: "Cómo se elaboró este informe",
     print: "Imprimir o guardar como PDF", newCheck: "Nueva verificación",
   },
   pt: {
+    methodText: "Este relatório foi preparado por agentes de IA com base em registros públicos oficiais e na lei de Connecticut. Antes de ser mostrada a você, cada constatação foi verificada com a fonte citada. É uma ferramenta de triagem, não aconselhamento jurídico.", sourcesUsed: "Fontes consultadas", safeguards: "Proteções aplicadas", noSafeguards: "Nenhuma proteção precisou ser acionada nesta análise.",
     summaryTab: "Resumo", rankingTab: "Classificação e mapa",
     listingUI: {"eyebrow": "Verificação do anúncio", "risk": {"High": "Alto risco de golpe", "Elevated": "Risco elevado de golpe", "Low": "Baixo risco de golpe"}, "nextSteps": "Antes de pagar qualquer coisa", "ftc": "Denuncie uma suspeita de golpe à FTC", "fullCheck": "Fazer a verificação completa deste endereço"},
     coachUI: {"title": "Coach de negociação", "intro": "Transforme estas constatações em ação: receba uma carta pronta para enviar pedindo cada correção ao proprietário, ou pratique a conversa antes.", "draftLetter": "Redigir uma carta ao proprietário", "practice": "Praticar a conversa", "letterNote": "A carta está em inglês porque será enviada ao proprietário. Revise antes de enviar.", "copy": "Copiar carta", "copied": "Copiada", "choose": "Escolha o proprietário para praticar", "personas": {"reasonable": ["Razoável", "Concorda quando você pede com clareza e dá um motivo"], "busy": ["Ocupado", "Precisa da cláusula exata e da mudança exata"], "tough": ["Difícil", "Resiste; quer a cláusula, a mudança e a lei"]}, "won": "Pontos conquistados", "turnsLeft": "Turnos restantes", "placeholder": "Escreva o que você diria ao proprietário…", "send": "Enviar", "you": "Você", "landlord": "Proprietário", "coach": "Coach", "allWon": "Você negociou todas as correções. Agora peça o contrato revisado por escrito.", "restart": "Recomeçar", "note": "Apenas prática: o proprietário de IA é um personagem, não o seu proprietário."},
@@ -61,10 +64,11 @@ const I18N = {
     registryTitle: "Registros de criminosos sexuais",
     registryText: "Indicamos os registros oficiais em vez de consultá-los por você. Os sites oficiais são os mais atualizados, e seus dados devem ser lidos com o contexto e os avisos que esses sites fornecem.",
     ctReg: "Registro de Criminosos Sexuais de Connecticut", natReg: "Site Público Nacional de Criminosos Sexuais (Departamento de Justiça dos EUA)",
-    limits: "Escopo e limitações", method: "Metodologia e custo",
+    limits: "Escopo e limitações", method: "Como este relatório foi feito",
     print: "Imprimir ou salvar como PDF", newCheck: "Nova verificação",
   },
   zh: {
+    methodText: "本报告由 AI 智能体根据官方公共记录和康涅狄格州法律编写。在向您展示之前，每一项结果都已与其引用的来源进行核对。本报告仅供筛查参考，不构成法律意见。", sourcesUsed: "参考来源", safeguards: "已启用的保护措施", noSafeguards: "本次核查未触发任何保护措施。",
     summaryTab: "摘要", rankingTab: "排名与地图",
     listingUI: {"eyebrow": "房源信息核查", "risk": {"High": "诈骗风险高", "Elevated": "诈骗风险较高", "Low": "诈骗风险低"}, "nextSteps": "付款之前请先做到", "ftc": "向美国联邦贸易委员会（FTC）举报疑似诈骗", "fullCheck": "对该地址进行完整核查"},
     coachUI: {"title": "谈判教练", "intro": "把这些发现变成行动：生成一封可直接发送的信，逐项请房东修改；或者先练习如何沟通。", "draftLetter": "起草致房东的信", "practice": "练习谈判对话", "letterNote": "这封信用英文撰写，因为收信人是房东。发送前请仔细核对。", "copy": "复制信件", "copied": "已复制", "choose": "选择练习对象", "personas": {"reasonable": ["通情达理", "只要您清楚提出并说明理由就会同意"], "busy": ["忙碌型", "需要您指出具体条款和具体修改"], "tough": ["强硬型", "会反驳；需要条款、修改内容和法律依据"]}, "won": "已争取到", "turnsLeft": "剩余回合", "placeholder": "写下您想对房东说的话…", "send": "发送", "you": "您", "landlord": "房东", "coach": "教练", "allWon": "所有修改都谈妥了。现在请房东以书面形式提供修订后的租约。", "restart": "重新开始", "note": "仅供练习：AI 房东是角色扮演，并非您真正的房东。"},
@@ -82,10 +86,11 @@ const I18N = {
     registryTitle: "性犯罪者登记信息",
     registryText: "我们提供官方登记网站的链接，而不是代您查询。官方网站的信息最新，查阅时请结合这些网站提供的背景说明和注意事项。",
     ctReg: "康涅狄格州性犯罪者登记处", natReg: "全国性犯罪者公共网站（美国司法部）",
-    limits: "范围与局限", method: "方法与成本",
+    limits: "范围与局限", method: "本报告的生成方式",
     print: "打印或另存为 PDF", newCheck: "新的核查",
   },
   ko: {
+    methodText: "이 보고서는 AI 에이전트가 공식 공공 기록과 코네티컷주 법률을 바탕으로 작성했습니다. 표시되기 전에 모든 확인 사항은 인용한 출처와 대조하여 검증되었습니다. 이는 사전 점검 도구이며 법률 자문이 아닙니다.", sourcesUsed: "참고한 출처", safeguards: "적용된 보호 장치", noSafeguards: "이번 검토에서는 보호 장치가 필요하지 않았습니다.",
     summaryTab: "요약", rankingTab: "순위 및 지도",
     listingUI: {"eyebrow": "매물 광고 확인", "risk": {"High": "사기 위험 높음", "Elevated": "사기 위험 다소 높음", "Low": "사기 위험 낮음"}, "nextSteps": "돈을 보내기 전에", "ftc": "의심되는 사기를 FTC에 신고하기", "fullCheck": "이 주소 전체 검증하기"},
     coachUI: {"title": "협상 코치", "intro": "이 결과를 행동으로 옮기세요. 집주인에게 항목별 수정을 요청하는, 바로 보낼 수 있는 편지를 받거나 먼저 대화를 연습해 보세요.", "draftLetter": "집주인에게 보낼 편지 작성", "practice": "대화 연습하기", "letterNote": "편지는 집주인에게 보내는 것이므로 영어로 작성됩니다. 보내기 전에 검토하세요.", "copy": "편지 복사", "copied": "복사됨", "choose": "연습할 집주인 유형 선택", "personas": {"reasonable": ["합리적", "분명하게 요청하고 이유를 말하면 동의합니다"], "busy": ["바쁨", "정확한 조항과 정확한 변경 내용이 필요합니다"], "tough": ["까다로움", "반박합니다. 조항, 변경 내용, 법적 근거를 요구합니다"]}, "won": "합의한 항목", "turnsLeft": "남은 턴", "placeholder": "집주인에게 할 말을 입력하세요…", "send": "보내기", "you": "나", "landlord": "집주인", "coach": "코치", "allWon": "모든 수정 사항에 합의했습니다. 이제 수정된 계약서를 서면으로 요청하세요.", "restart": "다시 시작", "note": "연습용입니다: AI 집주인은 역할극 캐릭터이며 실제 집주인이 아닙니다."},
@@ -103,10 +108,11 @@ const I18N = {
     registryTitle: "성범죄자 등록 정보",
     registryText: "저희는 대신 검색하지 않고 공식 등록 사이트로 연결해 드립니다. 공식 사이트가 가장 최신 정보를 제공하며, 해당 기록은 사이트에서 제공하는 맥락과 주의 사항을 함께 참고해 읽어야 합니다.",
     ctReg: "코네티컷주 성범죄자 등록부", natReg: "전국 성범죄자 공개 웹사이트 (미 법무부)",
-    limits: "범위 및 한계", method: "방법론 및 비용",
+    limits: "범위 및 한계", method: "이 보고서의 작성 방법",
     print: "인쇄 또는 PDF로 저장", newCheck: "새 검증",
   },
   fr: {
+    methodText: "Ce rapport a été préparé par des agents d'IA à partir de registres publics officiels et du droit du Connecticut. Avant de vous être présenté, chaque constat a été vérifié par rapport à la source citée. Il s'agit d'un outil de vérification préalable, et non d'un avis juridique.", sourcesUsed: "Sources consultées", safeguards: "Protections appliquées", noSafeguards: "Aucune protection n'a été nécessaire lors de cet examen.",
     summaryTab: "Résumé", rankingTab: "Classement et carte",
     listingUI: {"eyebrow": "Vérification de l'annonce", "risk": {"High": "Risque d'arnaque élevé", "Elevated": "Risque d'arnaque accru", "Low": "Risque d'arnaque faible"}, "nextSteps": "Avant de payer quoi que ce soit", "ftc": "Signaler une arnaque présumée à la FTC", "fullCheck": "Lancer une vérification complète de cette adresse"},
     coachUI: {"title": "Coach de négociation", "intro": "Passez à l'action : obtenez une lettre prête à envoyer demandant chaque correction au propriétaire, ou entraînez-vous d'abord à la conversation.", "draftLetter": "Rédiger une lettre au propriétaire", "practice": "S'entraîner à la conversation", "letterNote": "La lettre est en anglais car elle est destinée au propriétaire. Relisez-la avant de l'envoyer.", "copy": "Copier la lettre", "copied": "Copiée", "choose": "Choisissez votre propriétaire d'entraînement", "personas": {"reasonable": ["Raisonnable", "Accepte si vous demandez clairement en donnant une raison"], "busy": ["Pressé", "Veut la clause exacte et la modification exacte"], "tough": ["Coriace", "Résiste ; exige la clause, la modification et la loi"]}, "won": "Points obtenus", "turnsLeft": "Tours restants", "placeholder": "Écrivez ce que vous diriez au propriétaire…", "send": "Envoyer", "you": "Vous", "landlord": "Propriétaire", "coach": "Coach", "allWon": "Vous avez obtenu toutes les corrections. Demandez maintenant le bail révisé par écrit.", "restart": "Recommencer", "note": "Entraînement uniquement : le propriétaire IA est un personnage, pas votre propriétaire."},
@@ -124,7 +130,7 @@ const I18N = {
     registryTitle: "Registres des délinquants sexuels",
     registryText: "Nous renvoyons vers les registres officiels au lieu de les consulter à votre place. Les sites officiels sont les plus à jour, et leurs informations doivent être lues avec le contexte et les mises en garde qu'ils fournissent.",
     ctReg: "Registre des délinquants sexuels du Connecticut", natReg: "Site public national des délinquants sexuels (ministère de la Justice des États-Unis)",
-    limits: "Portée et limites", method: "Méthodologie et coût",
+    limits: "Portée et limites", method: "Comment ce rapport a été établi",
     print: "Imprimer ou enregistrer en PDF", newCheck: "Nouvelle vérification",
   },
 };
