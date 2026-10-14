@@ -2,6 +2,7 @@
 // by the Lead Advisor in the chosen language; these are the fixed parts of the page around it.
 const I18N = {
   en: {
+    summaryTab: "Summary", rankingTab: "Ranking & map",
     listingUI: {"eyebrow": "Listing check", "risk": {"High": "High scam risk", "Elevated": "Elevated scam risk", "Low": "Low scam risk"}, "nextSteps": "Before you pay anything", "ftc": "Report a suspected scam to the FTC", "fullCheck": "Run a full verification of this address"},
     coachUI: {"title": "Negotiation coach", "intro": "Turn these findings into action: get a ready-to-send letter asking the landlord for each fix, or practice the conversation first.", "draftLetter": "Draft a letter to the landlord", "practice": "Practice the conversation", "letterNote": "The letter is in English because it goes to the landlord. Review it before sending.", "copy": "Copy letter", "copied": "Copied", "choose": "Choose your practice landlord", "personas": {"reasonable": ["Reasonable", "Agrees when you ask clearly and give a reason"], "busy": ["Busy", "Needs the exact clause and the exact change"], "tough": ["Tough", "Pushes back; wants the clause, the change and the law"]}, "won": "Issues won", "turnsLeft": "Turns left", "placeholder": "Write what you'd say to the landlord…", "send": "Send", "you": "You", "landlord": "Landlord", "coach": "Coach", "allWon": "You negotiated every fix. Now ask for the revised lease in writing.", "restart": "Start over", "note": "Practice only: the AI landlord is a role-play character, not your landlord."},
     riskScore: "Risk score",
@@ -22,6 +23,7 @@ const I18N = {
     print: "Print or save as PDF", newCheck: "New verification",
   },
   es: {
+    summaryTab: "Resumen", rankingTab: "Clasificación y mapa",
     listingUI: {"eyebrow": "Revisión del anuncio", "risk": {"High": "Riesgo alto de estafa", "Elevated": "Riesgo elevado de estafa", "Low": "Riesgo bajo de estafa"}, "nextSteps": "Antes de pagar nada", "ftc": "Denuncie una posible estafa ante la FTC", "fullCheck": "Verificar a fondo esta dirección"},
     coachUI: {"title": "Asesor de negociación", "intro": "Convierta estos hallazgos en acción: obtenga una carta lista para enviar que pida cada corrección al arrendador, o practique primero la conversación.", "draftLetter": "Redactar una carta al arrendador", "practice": "Practicar la conversación", "letterNote": "La carta está en inglés porque va dirigida al arrendador. Revísela antes de enviarla.", "copy": "Copiar carta", "copied": "Copiada", "choose": "Elija su arrendador de práctica", "personas": {"reasonable": ["Razonable", "Acepta si usted lo pide con claridad y da una razón"], "busy": ["Ocupado", "Necesita la cláusula exacta y el cambio exacto"], "tough": ["Exigente", "Se resiste; quiere la cláusula, el cambio y la ley"]}, "won": "Puntos logrados", "turnsLeft": "Turnos restantes", "placeholder": "Escriba lo que le diría al arrendador…", "send": "Enviar", "you": "Usted", "landlord": "Arrendador", "coach": "Asesor", "allWon": "Logró todas las correcciones. Ahora pida el contrato revisado por escrito.", "restart": "Empezar de nuevo", "note": "Solo práctica: el arrendador de IA es un personaje, no su arrendador real."},
     riskScore: "Puntuación de riesgo",
@@ -42,6 +44,7 @@ const I18N = {
     print: "Imprimir o guardar como PDF", newCheck: "Nueva verificación",
   },
   pt: {
+    summaryTab: "Resumo", rankingTab: "Classificação e mapa",
     listingUI: {"eyebrow": "Verificação do anúncio", "risk": {"High": "Alto risco de golpe", "Elevated": "Risco elevado de golpe", "Low": "Baixo risco de golpe"}, "nextSteps": "Antes de pagar qualquer coisa", "ftc": "Denuncie uma suspeita de golpe à FTC", "fullCheck": "Fazer a verificação completa deste endereço"},
     coachUI: {"title": "Coach de negociação", "intro": "Transforme estas constatações em ação: receba uma carta pronta para enviar pedindo cada correção ao proprietário, ou pratique a conversa antes.", "draftLetter": "Redigir uma carta ao proprietário", "practice": "Praticar a conversa", "letterNote": "A carta está em inglês porque será enviada ao proprietário. Revise antes de enviar.", "copy": "Copiar carta", "copied": "Copiada", "choose": "Escolha o proprietário para praticar", "personas": {"reasonable": ["Razoável", "Concorda quando você pede com clareza e dá um motivo"], "busy": ["Ocupado", "Precisa da cláusula exata e da mudança exata"], "tough": ["Difícil", "Resiste; quer a cláusula, a mudança e a lei"]}, "won": "Pontos conquistados", "turnsLeft": "Turnos restantes", "placeholder": "Escreva o que você diria ao proprietário…", "send": "Enviar", "you": "Você", "landlord": "Proprietário", "coach": "Coach", "allWon": "Você negociou todas as correções. Agora peça o contrato revisado por escrito.", "restart": "Recomeçar", "note": "Apenas prática: o proprietário de IA é um personagem, não o seu proprietário."},
     riskScore: "Pontuação de risco",
@@ -62,6 +65,7 @@ const I18N = {
     print: "Imprimir ou salvar como PDF", newCheck: "Nova verificação",
   },
   zh: {
+    summaryTab: "摘要", rankingTab: "排名与地图",
     listingUI: {"eyebrow": "房源信息核查", "risk": {"High": "诈骗风险高", "Elevated": "诈骗风险较高", "Low": "诈骗风险低"}, "nextSteps": "付款之前请先做到", "ftc": "向美国联邦贸易委员会（FTC）举报疑似诈骗", "fullCheck": "对该地址进行完整核查"},
     coachUI: {"title": "谈判教练", "intro": "把这些发现变成行动：生成一封可直接发送的信，逐项请房东修改；或者先练习如何沟通。", "draftLetter": "起草致房东的信", "practice": "练习谈判对话", "letterNote": "这封信用英文撰写，因为收信人是房东。发送前请仔细核对。", "copy": "复制信件", "copied": "已复制", "choose": "选择练习对象", "personas": {"reasonable": ["通情达理", "只要您清楚提出并说明理由就会同意"], "busy": ["忙碌型", "需要您指出具体条款和具体修改"], "tough": ["强硬型", "会反驳；需要条款、修改内容和法律依据"]}, "won": "已争取到", "turnsLeft": "剩余回合", "placeholder": "写下您想对房东说的话…", "send": "发送", "you": "您", "landlord": "房东", "coach": "教练", "allWon": "所有修改都谈妥了。现在请房东以书面形式提供修订后的租约。", "restart": "重新开始", "note": "仅供练习：AI 房东是角色扮演，并非您真正的房东。"},
     riskScore: "风险分",
@@ -82,6 +86,7 @@ const I18N = {
     print: "打印或另存为 PDF", newCheck: "新的核查",
   },
   ko: {
+    summaryTab: "요약", rankingTab: "순위 및 지도",
     listingUI: {"eyebrow": "매물 광고 확인", "risk": {"High": "사기 위험 높음", "Elevated": "사기 위험 다소 높음", "Low": "사기 위험 낮음"}, "nextSteps": "돈을 보내기 전에", "ftc": "의심되는 사기를 FTC에 신고하기", "fullCheck": "이 주소 전체 검증하기"},
     coachUI: {"title": "협상 코치", "intro": "이 결과를 행동으로 옮기세요. 집주인에게 항목별 수정을 요청하는, 바로 보낼 수 있는 편지를 받거나 먼저 대화를 연습해 보세요.", "draftLetter": "집주인에게 보낼 편지 작성", "practice": "대화 연습하기", "letterNote": "편지는 집주인에게 보내는 것이므로 영어로 작성됩니다. 보내기 전에 검토하세요.", "copy": "편지 복사", "copied": "복사됨", "choose": "연습할 집주인 유형 선택", "personas": {"reasonable": ["합리적", "분명하게 요청하고 이유를 말하면 동의합니다"], "busy": ["바쁨", "정확한 조항과 정확한 변경 내용이 필요합니다"], "tough": ["까다로움", "반박합니다. 조항, 변경 내용, 법적 근거를 요구합니다"]}, "won": "합의한 항목", "turnsLeft": "남은 턴", "placeholder": "집주인에게 할 말을 입력하세요…", "send": "보내기", "you": "나", "landlord": "집주인", "coach": "코치", "allWon": "모든 수정 사항에 합의했습니다. 이제 수정된 계약서를 서면으로 요청하세요.", "restart": "다시 시작", "note": "연습용입니다: AI 집주인은 역할극 캐릭터이며 실제 집주인이 아닙니다."},
     riskScore: "위험 점수",
@@ -102,6 +107,7 @@ const I18N = {
     print: "인쇄 또는 PDF로 저장", newCheck: "새 검증",
   },
   fr: {
+    summaryTab: "Résumé", rankingTab: "Classement et carte",
     listingUI: {"eyebrow": "Vérification de l'annonce", "risk": {"High": "Risque d'arnaque élevé", "Elevated": "Risque d'arnaque accru", "Low": "Risque d'arnaque faible"}, "nextSteps": "Avant de payer quoi que ce soit", "ftc": "Signaler une arnaque présumée à la FTC", "fullCheck": "Lancer une vérification complète de cette adresse"},
     coachUI: {"title": "Coach de négociation", "intro": "Passez à l'action : obtenez une lettre prête à envoyer demandant chaque correction au propriétaire, ou entraînez-vous d'abord à la conversation.", "draftLetter": "Rédiger une lettre au propriétaire", "practice": "S'entraîner à la conversation", "letterNote": "La lettre est en anglais car elle est destinée au propriétaire. Relisez-la avant de l'envoyer.", "copy": "Copier la lettre", "copied": "Copiée", "choose": "Choisissez votre propriétaire d'entraînement", "personas": {"reasonable": ["Raisonnable", "Accepte si vous demandez clairement en donnant une raison"], "busy": ["Pressé", "Veut la clause exacte et la modification exacte"], "tough": ["Coriace", "Résiste ; exige la clause, la modification et la loi"]}, "won": "Points obtenus", "turnsLeft": "Tours restants", "placeholder": "Écrivez ce que vous diriez au propriétaire…", "send": "Envoyer", "you": "Vous", "landlord": "Propriétaire", "coach": "Coach", "allWon": "Vous avez obtenu toutes les corrections. Demandez maintenant le bail révisé par écrit.", "restart": "Recommencer", "note": "Entraînement uniquement : le propriétaire IA est un personnage, pas votre propriétaire."},
     riskScore: "Score de risque",

@@ -44,6 +44,13 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spac
 .brand-mark { width: 34px; height: 34px; }
 .brand-name { font-family: var(--serif); font-size: 23px; font-weight: 600; line-height: 1; }
 .brand-sub { display: block; font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--slate); margin-top: 4px; }
+.featurebar { position: sticky; top: 0; z-index: 1000; background: var(--navy); border-bottom: 1px solid #22385a; }
+.featurebar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 48px; }
+.fb-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.fb-tabs button { font: inherit; font-size: 14px; color: #c5cfdc; background: none; border: 0; border-bottom: 2px solid transparent; padding: 13px 12px 11px; cursor: pointer; white-space: nowrap; }
+.fb-tabs button:hover { color: #fff; }
+.fb-tabs button.fb-active { color: #fff; border-bottom-color: var(--brass); }
+.fb-sample { font: inherit; font-size: 13px; font-weight: 600; color: var(--navy); background: #fff; border: 0; border-radius: 2px; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
 .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; }
 .nav-links a { color: var(--slate); text-decoration: none; }
 .nav-links a:hover { color: var(--navy); }
@@ -80,6 +87,13 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spac
 .team-diagram .specialists { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
 .team-diagram .specialists .node { max-width: none; }
 .team-diagram .arrow { color: var(--brass); font-size: 20px; line-height: 1; }
+.secnav { position: sticky; top: 48px; z-index: 900; background: rgba(247,248,250,.97); border-bottom: 1px solid var(--hairline); margin: 0 0 20px; padding: 10px 0; }
+.secnav div { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.secnav a { white-space: nowrap; font-size: 14px; color: var(--slate); text-decoration: none; padding: 6px 14px; border: 1px solid var(--hairline); border-radius: 999px; background: #fff; }
+.secnav a:hover { color: var(--navy); border-color: var(--navy); }
+.secnav a.active { color: #fff; background: var(--navy); border-color: var(--navy); }
+#report section.card, #compare-result section.card { scroll-margin-top: 120px; }
+#form-card, #how { scroll-margin-top: 60px; }
 .sample-banner { background: var(--amber-soft); border-left: 3px solid var(--brass); padding: 12px 16px; margin: 0 0 18px; font-size: 14.5px; }
 
 /* ---------- cards ---------- */
@@ -128,7 +142,19 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--navy
 .pc .pro b { color: var(--green); } .pc .con b { color: var(--red); }
 .coach-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
 .letter-card { margin-top: 20px; border: 1px solid var(--hairline); background: var(--bg); padding: 18px 22px; }
-.letter-card pre { white-space: pre-wrap; font-family: var(--sans); font-size: 15px; line-height: 1.6; margin: 10px 0 14px; }
+.letter-paper { background: #fff; border: 1px solid var(--hairline); box-shadow: 0 6px 20px rgba(11,31,58,.06); padding: 34px 42px; margin: 12px 0 16px; font-size: 15.5px; line-height: 1.7; color: var(--ink); }
+.letter-paper p { margin: 0 0 14px; }
+.letter-subject { font-family: var(--serif); font-size: 22px; color: var(--navy); border-bottom: 1px solid var(--hairline); padding-bottom: 14px; margin-bottom: 20px; }
+.letter-subject span { display: block; font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--slate); margin-bottom: 2px; }
+.letter-items { list-style: none; counter-reset: req; padding: 0; margin: 6px 0 20px; }
+.letter-items li { counter-increment: req; position: relative; padding: 14px 0 14px 46px; border-top: 1px solid var(--hairline); }
+.letter-items li:last-child { border-bottom: 1px solid var(--hairline); }
+.letter-items li::before { content: counter(req); position: absolute; left: 0; top: 15px; width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.letter-items b { display: block; font-size: 15.5px; color: var(--navy); }
+.letter-items p { margin: 2px 0 6px; }
+.letter-items .cite { display: inline-block; font-size: 12.5px; background: var(--blue-soft); color: var(--slate); padding: 2px 9px; border-radius: 2px; }
+.letter-paper .sign { margin: 0; }
+@media (max-width: 760px) { .letter-paper { padding: 22px 20px; } }
 .personas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .persona { border: 1px solid var(--hairline); padding: 12px 14px; cursor: pointer; font-size: 14px; }
 .persona input { accent-color: var(--navy); margin-right: 6px; }
@@ -301,7 +327,6 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#sources">Sources</a>
-      <a href="/org">For organizations</a>
       <span class="secure">
         <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
         Lease text never saved
@@ -309,6 +334,18 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid #22385a; padding-top:
     </div>
   </div>
 </nav>
+<div class="featurebar" role="navigation" aria-label="Features">
+  <div class="wrap">
+    <div class="fb-tabs">
+      <button type="button" data-go="single" class="fb-active">Verify a property</button>
+      <button type="button" data-go="compare">Compare a shortlist</button>
+      <button type="button" data-go="listing">Scam check</button>
+      <button type="button" data-go="coach">Negotiation coach</button>
+      <button type="button" data-go="org">For organizations</button>
+    </div>
+    <button type="button" class="fb-sample" data-go="sample">Sample report</button>
+  </div>
+</div>
 
 <header class="hero">
   <div class="wrap">

@@ -17,6 +17,15 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--s
 .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
 .bar h1 { color: #fff; font-family: var(--serif); font-weight: 500; font-size: 26px; display: inline; margin: 0; }
 .bar a { color: #c8d2e0; font-size: 14px; margin-left: 18px; }
+.featurebar { position: sticky; top: 0; z-index: 1000; background: #13294b; border-bottom: 1px solid #22385a; }
+.featurebar .wrap { display: flex; gap: 4px; overflow-x: auto; height: 46px; align-items: stretch; }
+.featurebar a { color: #c5cfdc; text-decoration: none; font-size: 14px; padding: 13px 12px 0; border-bottom: 2px solid transparent; white-space: nowrap; }
+.featurebar a:hover { color: #fff; } .featurebar a.on { color: #fff; border-bottom-color: var(--brass); }
+.secnav { position: sticky; top: 46px; z-index: 900; background: rgba(247,248,250,.97); border-bottom: 1px solid var(--line); padding: 10px 0; margin-top: 10px; }
+.secnav div { display: flex; gap: 8px; overflow-x: auto; }
+.secnav a { white-space: nowrap; font-size: 14px; color: var(--slate); text-decoration: none; padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; }
+.secnav a:hover { color: var(--navy); border-color: var(--navy); }
+#out section.card { scroll-margin-top: 110px; }
 .card { background: #fff; border: 1px solid var(--line); padding: 28px 32px; margin: 24px 0; box-shadow: 0 8px 24px rgba(11,31,58,.05); }
 h2 { font-family: var(--serif); font-weight: 500; color: var(--navy); font-size: 28px; margin: 0 0 8px; }
 .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin: 0 0 8px; }
@@ -47,7 +56,11 @@ ol li { margin: 6px 0; }
 </style>
 </head>
 <body>
-<div class="bar"><div class="wrap"><h1>Before You Sign · For organizations</h1><a href="/">Single property</a></div></div>
+<div class="bar"><div class="wrap"><h1>Before You Sign · For organizations</h1></div></div>
+<div class="featurebar"><div class="wrap">
+  <a href="/?go=single">Verify a property</a><a href="/?go=compare">Compare a shortlist</a><a href="/?go=listing">Scam check</a>
+  <a href="/?go=coach">Negotiation coach</a><a href="/org" class="on">For organizations</a>
+</div></div>
 <main class="wrap">
   <section class="card">
     <p class="eyebrow">Batch screening</p>
@@ -127,7 +140,8 @@ function render(r) {
   const rows = r.rows.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(pretty(x.address || x.input))}${x.status !== "done" ? `<br><span class="muted">${esc(x.error || x.status)}</span>` : ""}</td>
       <td>${esc(x.owner || "–")}</td><td>${x.owner_ct_parcels ?? "–"}</td><td>${x.reports_at_address ?? "–"}</td><td>${flagBadges(x.flags || [])}</td></tr>`).join("");
   $("#out").innerHTML = `
-    <section class="card"><p class="eyebrow">Summary for staff</p><h2>${esc(S.headline)}</h2><p>${esc(S.summary)}</p>
+    <nav class="secnav"><div><a href="#o-summary">Summary &amp; map</a><a href="#o-owners">By landlord</a><a href="#o-rows">Every address</a></div></nav>
+    <section class="card" id="o-summary"><p class="eyebrow">Summary for staff</p><h2>${esc(S.headline)}</h2><p>${esc(S.summary)}</p>
       <ol>${S.priorities.map((p) => `<li>${esc(p)}</li>`).join("")}</ol>
       <div class="kpis">
         <div class="kpi"><b>${R.addresses_screened}/${R.addresses_submitted}</b><span>addresses screened</span></div>
@@ -138,9 +152,9 @@ function render(r) {
       <div id="map"></div><p class="muted">Pins show the number of flags at each address.</p>
       <div class="row"><button class="secondary" id="csv-out">Download results (CSV)</button></div>
     </section>
-    <section class="card"><p class="eyebrow">By landlord</p><h2>Owners of record</h2>
+    <section class="card" id="o-owners"><p class="eyebrow">By landlord</p><h2>Owners of record</h2>
       <table><thead><tr><th>Owner</th><th>Listings here</th><th>Flagged</th><th>CT parcels owned</th><th>Flags</th></tr></thead><tbody>${owners}</tbody></table></section>
-    <section class="card"><p class="eyebrow">By listing</p><h2>Every address</h2>
+    <section class="card" id="o-rows"><p class="eyebrow">By listing</p><h2>Every address</h2>
       <table><thead><tr><th>#</th><th>Address</th><th>Owner</th><th>CT parcels</th><th>311 at address</th><th>Flags</th></tr></thead><tbody>${rows}</tbody></table>
       <p class="muted" style="margin-top:12px">Flags are prompts for review based on public records, not findings of wrongdoing.</p></section>`;
   const pts = r.rows.filter((x) => x.lat && x.lng);

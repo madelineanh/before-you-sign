@@ -49,9 +49,18 @@ def _usage(u) -> dict[str, int]:
 # ------------------------------------------------------------------- letter
 
 
+class LetterItem(BaseModel):
+    topic: str = Field(description="2-4 word heading, e.g. 'Security deposit'")
+    request: str = Field(description="One or two plain sentences: what the lease says and the change you are asking for")
+    statute: str | None = Field(default=None, description="The citation if the report cites one, e.g. 'Conn. Gen. Stat. § 47a-21(b)'")
+
+
 class Letter(BaseModel):
-    subject: str
-    body: str = Field(description="The full email, ready to send, signed with [Your name]")
+    greeting: str = Field(description="e.g. 'Hello,'")
+    opening: str = Field(description="One or two sentences: thanks, and a request for the changes below before signing")
+    items: list[LetterItem]
+    closing: str = Field(description="One or two sentences asking for a revised lease in writing")
+    sign_off: str = Field(description="e.g. 'Best regards,'")
 
 
 @dataclass
@@ -64,33 +73,58 @@ specific changes before signing the lease. You receive the issues found in the t
 Connecticut statutes cited in it.
 
 Rules:
-- Write in English (it goes to the landlord), in a warm, professional tone. No threats, no legal conclusions beyond
-  what the report states. Under 300 words.
-- Address each issue in a short numbered list: what the lease says, the requested change, and the statute when the
-  report cites one (e.g. Conn. Gen. Stat. § 47a-21(b)).
-- Ask for a revised lease in writing. Sign as [Your name].
+- English (it goes to the landlord), warm and professional. No threats and no legal conclusions beyond the report.
+- One item per issue. Keep each request to one or two plain sentences; put the citation in the statute field, not in
+  the request text. Plain text only: no markdown, asterisks or bullet symbols.
+- Quote the lease only when it helps, briefly, in double quotes, word for word.
 - Use ONLY facts and numbers from the input. Every number must appear in the input exactly; dollar amounts as $1,800."""
 
 letter_agent = Agent(output_type=Letter, deps_type=LetterState, instructions=LETTER_PROMPT,
                      model_settings=_settings("letter"), retries=2, name="letter_writer")
 
 
+def _letter_text(out: Letter) -> str:
+    return " ".join([out.opening, out.closing] + [f"{i.topic} {i.request} {i.statute or ''}" for i in out.items])
+
+
 @letter_agent.output_validator
 def _letter_valid(ctx: RunContext[LetterState], out: Letter) -> Letter:
     supported = _numbers(ctx.deps.context_text) | {"311"}
-    bad = sorted(n for n in _numbers(out.subject + " " + out.body) if len(n.replace(".", "")) >= 2 and n not in supported)
+    bad = sorted(n for n in _numbers(_letter_text(out)) if len(n.replace(".", "")) >= 2 and n not in supported)
     if bad:
         raise ModelRetry(f"These numbers are not in the report: {bad}. Use only numbers from the input.")
+    for i in out.items:  # belt and braces: strip any markdown the model slipped in
+        i.topic, i.request = i.topic.replace("*", "").strip(), i.request.replace("*", "").strip()
     return out
 
 
-async def draft_letter(result: dict[str, Any]) -> tuple[Letter, dict[str, int]]:
+def pretty_address(raw: str) -> str:
+    """'224 WOOSTER ST, NEW HAVEN, CT, 06511' -> '224 Wooster St, New Haven, CT 06511'"""
+    parts = [p.strip() for p in raw.split(",")]
+    zip_code = parts.pop() if parts and parts[-1].isdigit() else ""
+    state = parts.pop() if len(parts) > 2 else ""
+    street = ", ".join(parts).title()
+    return ", ".join(x for x in (street, " ".join(x for x in (state, zip_code) if x)) if x)
+
+
+def letter_plain_text(out: Letter, subject: str) -> str:
+    lines = [f"Subject: {subject}", "", out.greeting, "", out.opening, ""]
+    for n, i in enumerate(out.items, 1):
+        lines.append(f"{n}. {i.topic}: {i.request}" + (f" ({i.statute})" if i.statute else ""))
+    lines += ["", out.closing, "", out.sign_off, "[Your name]"]
+    return "\n".join(lines)
+
+
+async def draft_letter(result: dict[str, Any]) -> tuple[dict[str, Any], dict[str, int]]:
     issues = negotiable_issues(result)
-    context = json.dumps({"address": result["address"]["matched_address"], "issues": issues,
+    address = pretty_address(result["address"]["matched_address"])
+    context = json.dumps({"address": address, "issues": issues,
                           "statutes_cited_in_report": _citations(result)}, ensure_ascii=False)
     run = await letter_agent.run(f"Report issues:\n{context}", deps=LetterState(context), model=model(),
                                  usage_limits=UsageLimits(request_limit=4, total_tokens_limit=60_000))
-    return run.output, _usage(run.usage)
+    subject = f"Requested lease changes before signing: {address.split(',')[0]}"
+    letter = {**run.output.model_dump(), "subject": subject, "plain_text": letter_plain_text(run.output, subject)}
+    return letter, _usage(run.usage)
 
 
 # ----------------------------------------------------------------- practice

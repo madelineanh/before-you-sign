@@ -264,7 +264,7 @@ function findingsHtml(findings, evidence, T) {
   }).join("");
 }
 
-function renderReport(result, jobId) {
+function renderReport(result, jobId, { scroll = true } = {}) {
   const T = I18N[result.language] || I18N.en;
   const r = result.report;
   const evidence = Object.fromEntries((result.evidence || []).map((e) => [e.id, e]));
@@ -281,8 +281,10 @@ function renderReport(result, jobId) {
 
   const when = new Date().toLocaleString(T.locale, { dateStyle: "long", timeStyle: "short" });
 
-  $("#report").innerHTML = `
-    <section class="card">
+  $("#report").innerHTML = sectionNav([["r-summary", T.summaryTab], ["r-findings", T.findings], ["r-questions", T.questions],
+                                       ...($("#report") && negotiableIssues(result).length ? [["coach", T.coachUI.title]] : []),
+                                       ["r-limits", T.limits], ["r-method", T.method]]) + `
+    <section class="card" id="r-summary">
       <div class="report-head">
         <div>
           <p class="eyebrow">${T.eyebrow}</p>
@@ -300,19 +302,19 @@ function renderReport(result, jobId) {
       <p class="summary">${esc(r.summary)}</p>
     </section>
 
-    <section class="card">
+    <section class="card" id="r-findings">
       <div class="card-head"><h2>${T.findings}</h2><p>${T.items(findings.length)}</p></div>
       ${findingHtml || `<p class="muted">${T.none}</p>`}
     </section>
 
-    <section class="card">
+    <section class="card" id="r-questions">
       <div class="card-head"><h2>${T.questions}</h2><p>${T.askBefore}</p></div>
       <ol class="questions">${r.questions_for_landlord.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
     </section>
 
     ${coachCardHtml(result, T)}
 
-    <section class="card">
+    <section class="card" id="r-limits">
       <div class="registry">
         <h3>${T.registryTitle}</h3>
         <p>${T.registryText}</p>
@@ -322,7 +324,7 @@ function renderReport(result, jobId) {
       ${gaps.length ? `<h3 style="margin:28px 0 8px;color:var(--navy)">${T.limits}</h3><ul>${gaps.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : ""}
     </section>
 
-    <section class="card">
+    <section class="card" id="r-method">
       <details class="behind">
         <summary>${T.method}</summary>
         <p class="small">Model: ${esc(u.model)}. All figures below are measured from this review.</p>
@@ -345,7 +347,8 @@ function renderReport(result, jobId) {
   `;
   $("#report").hidden = false;
   setupCoach(result, jobId, T);
-  $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
+  watchSections($("#report"));
+  if (scroll) $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 loadSamples();
@@ -477,15 +480,15 @@ function renderCompare(result, jobId) {
   const failed = result.apartments.filter((a) => a.status !== "done");
   const u = result.usage.totals;
 
-  $("#compare-result").innerHTML = `
-    <section class="card">
+  $("#compare-result").innerHTML = sectionNav([["c-ranking", T.rankingTab], ["c-rec", T.recommendation]]) + `
+    <section class="card" id="c-ranking">
       <div class="card-head"><h2>${T.comparison}</h2><p>${result.apartments.length} · ${money(u.cost_usd)} · ${result.seconds}s</p></div>
       <div id="map"></div>
       ${rows}
       <p class="small" style="margin-top:14px">${esc(T.riskScore)}: ${esc(result.scoring)}</p>
       ${failed.length ? `<p class="small">${T.notChecked}: ${failed.map((a) => `${esc(a.label)} (${esc(a.address)})`).join(", ")}</p>` : ""}
     </section>
-    <section class="card">
+    <section class="card" id="c-rec">
       <div class="card-head"><h2>${T.recommendation}</h2></div>
       <p>${esc(stripIds(c.recommendation))}</p>
       <h3 style="margin:22px 0 6px;color:var(--navy)">${T.tradeoffs}</h3>
@@ -493,6 +496,7 @@ function renderCompare(result, jobId) {
     </section>`;
   $("#compare-result").hidden = false;
   $("#report").hidden = true;
+  watchSections($("#compare-result"));
 
   // Interactive map: one pin per apartment, colored by verdict.
   if (compareMap) { compareMap.remove(); compareMap = null; }
@@ -615,11 +619,22 @@ function setupCoach(result, jobId, T) {
       const resp = await fetch(`/api/jobs/${jobId}/letter`, { method: "POST" });
       const body = await resp.json();
       if (!resp.ok) throw new Error(body.detail || "Error");
-      box.innerHTML = `<div class="letter-card"><p class="small">${esc(C.letterNote)}</p>
-        <p><b>Subject:</b> ${esc(body.subject)}</p><pre>${esc(body.body)}</pre>
+      box.innerHTML = `<div class="letter-card">
+        <p class="small">${esc(C.letterNote)}</p>
+        <div class="letter-paper">
+          <div class="letter-subject"><span>Subject</span>${esc(body.subject)}</div>
+          <p>${esc(body.greeting)}</p>
+          <p>${esc(body.opening)}</p>
+          <ol class="letter-items">${body.items.map((i) => `<li>
+            <b>${esc(i.topic)}</b>
+            <p>${esc(stripIds(i.request))}</p>
+            ${i.statute ? `<span class="cite">${esc(i.statute)}</span>` : ""}</li>`).join("")}</ol>
+          <p>${esc(body.closing)}</p>
+          <p class="sign">${esc(body.sign_off)}<br>[Your name]</p>
+        </div>
         <button class="secondary" id="btn-copy">${esc(C.copy)}</button></div>`;
       $("#btn-copy").addEventListener("click", async () => {
-        await navigator.clipboard.writeText(`Subject: ${body.subject}\n\n${body.body}`);
+        await navigator.clipboard.writeText(body.plain_text);
         $("#btn-copy").textContent = C.copied;
       });
     } catch (ex) {
@@ -632,7 +647,7 @@ function setupCoach(result, jobId, T) {
   $("#btn-practice").addEventListener("click", () => {
     $("#practice-box").hidden = false;
     renderIssues();
-    $("#chat-input").focus();
+    $("#chat-input").focus({ preventScroll: true });
   });
   $("#btn-restart").addEventListener("click", reset);
   document.querySelectorAll('input[name="persona"]').forEach((r) => r.addEventListener("change", reset));
@@ -708,8 +723,8 @@ function renderListing(result, jobId) {
   const findings = [...r.findings].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
   const addr = result.address && result.address.matched_address;
   $("#compare-result").hidden = true;
-  $("#report").innerHTML = `
-    <section class="card">
+  $("#report").innerHTML = sectionNav([["l-summary", T.summaryTab], ["l-findings", T.findings], ["l-next", L.nextSteps]]) + `
+    <section class="card" id="l-summary">
       <div class="report-head"><div><p class="eyebrow">${esc(L.eyebrow)}</p>
         <div class="report-address">${addr ? esc(prettyAddress(addr)) : "—"}</div></div>
         <div class="report-meta">${T.reportNo} <b>${esc(String(jobId).toUpperCase())}</b></div></div>
@@ -717,11 +732,11 @@ function renderListing(result, jobId) {
       <p class="headline">${esc(r.headline)}</p>
       <p class="summary">${esc(r.summary)}</p>
     </section>
-    <section class="card">
+    <section class="card" id="l-findings">
       <div class="card-head"><h2>${T.findings}</h2><p>${T.items(findings.length)}</p></div>
       ${findingsHtml(findings, evidence, T)}
     </section>
-    <section class="card">
+    <section class="card" id="l-next">
       <div class="card-head"><h2>${esc(L.nextSteps)}</h2></div>
       <ol class="questions">${r.next_steps.map((q) => `<li>${esc(stripIds(q))}</li>`).join("")}</ol>
       <div class="coach-actions">
@@ -730,6 +745,7 @@ function renderListing(result, jobId) {
       </div>
     </section>`;
   $("#report").hidden = false;
+  watchSections($("#report"));
   if (addr) $("#btn-full-check").addEventListener("click", () => {
     document.querySelector('.tab[data-tab="single"]').click();
     $("#address").value = prettyAddress(addr);
@@ -747,19 +763,74 @@ async function openSample(thenCoach = false) {
   const body = await resp.json();
   $("#progress-card").hidden = true;
   $("#compare-result").hidden = true;
-  renderReport(body.result, "sample");
+  renderReport(body.result, "sample", { scroll: !thenCoach });
   if (thenCoach && $("#coach")) {
     $("#btn-practice").click();
-    setTimeout(() => $("#coach").scrollIntoView({ behavior: "smooth", block: "start" }), 400);
+    setTimeout(() => $("#coach").scrollIntoView({ behavior: scrollMode(), block: "start" }), 50);
   }
 }
 
 $("#see-sample").addEventListener("click", () => openSample(false));
 
-document.querySelectorAll(".feature").forEach((card) => card.addEventListener("click", () => {
-  const go = card.dataset.go;
+// Feature cards in the hero and the sticky feature bar share one handler.
+function markFeature(go) {
+  document.querySelectorAll(".fb-tabs button").forEach((b) => b.classList.toggle("fb-active", b.dataset.go === go));
+}
+
+document.querySelectorAll("[data-go]").forEach((el) => el.addEventListener("click", () => {
+  const go = el.dataset.go;
   if (go === "org") { location.href = "/org"; return; }
-  if (go === "coach") { openSample(true); return; }
+  if (go === "sample") { openSample(false); return; }
+  if (go === "coach") {
+    markFeature("coach");
+    // Use the report on screen if there is one with a coach; otherwise open the sample report's coach.
+    if ($("#coach") && !$("#report").hidden) {
+      $("#btn-practice").click();
+      $("#coach").scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      openSample(true);
+    }
+    return;
+  }
+  markFeature(go);
   document.querySelector(`.tab[data-tab="${go}"]`).click();
   $("#form-card").scrollIntoView({ behavior: "smooth", block: "start" });
 }));
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => markFeature(t.dataset.tab)));
+
+// Links from other pages (e.g. /org) arrive as /?go=compare and open that feature.
+const goParam = new URLSearchParams(location.search).get("go");
+if (goParam) {
+  const target = document.querySelector(`.fb-tabs [data-go="${CSS.escape(goParam)}"], .fb-sample[data-go="${CSS.escape(goParam)}"]`);
+  if (target) setTimeout(() => target.click(), 300);
+}
+
+
+// ------------------------------------------------------------ section navigation
+
+// A sticky bar of jump links at the top of a result, so nothing needs a long scroll.
+function sectionNav(items) {
+  return `<nav class="secnav" aria-label="Sections"><div>${items.map(([id, label]) =>
+    `<a href="#${id}" data-sec="${id}">${esc(label)}</a>`).join("")}</div></nav>`;
+}
+
+// Smooth scrolling only runs in a visible tab; jump instantly otherwise so the target is still reached.
+const scrollMode = () => (document.visibilityState === "visible" ? "smooth" : "auto");
+
+let sectionObserver = null;
+function watchSections(container) {
+  const nav = container.querySelector(".secnav");
+  if (!nav) return;
+  nav.querySelectorAll("a").forEach((a) => a.addEventListener("click", (e) => {
+    e.preventDefault();
+    const target = document.getElementById(a.dataset.sec);
+    if (target) target.scrollIntoView({ behavior: scrollMode(), block: "start" });
+  }));
+  if (sectionObserver) sectionObserver.disconnect();
+  sectionObserver = new IntersectionObserver((entries) => {
+    entries.filter((en) => en.isIntersecting).forEach((en) => {
+      nav.querySelectorAll("a").forEach((a) => a.classList.toggle("active", a.dataset.sec === en.target.id));
+    });
+  }, { rootMargin: "-130px 0px -60% 0px" });
+  nav.querySelectorAll("a").forEach((a) => { const t = document.getElementById(a.dataset.sec); if (t) sectionObserver.observe(t); });
+}

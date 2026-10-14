@@ -293,7 +293,7 @@ async def letter(job_id: str) -> dict:
         out, usage = await asyncio.wait_for(draft_letter(result), timeout=120)
     except Exception as exc:  # keep the message friendly; details stay server-side
         raise HTTPException(502, f"The letter could not be drafted ({exc.__class__.__name__}). Please try again.") from exc
-    return {"subject": out.subject, "body": out.body, "usage": usage}
+    return {**out, "usage": usage}
 
 
 @app.post("/api/jobs/{job_id}/practice")
