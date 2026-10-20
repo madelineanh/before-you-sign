@@ -293,8 +293,6 @@ blockquote cite { display: block; font-family: 'Helvetica Neue', Arial, sans-ser
     <tr><td><b>New capability</b></td><td>Owner → statewide portfolio → LLC principals in one step, in a market where LLCs "shield individual landlord names"</td><td>CT Mirror / New Haven Independent<sup><a href="#r9">[9]</a></sup></td></tr>
   </tbody>
 </table>
-<h3>Evidence from real users</h3>
-{{study_report}}
 
 <!-- ===================================================== 8. LIMITS -->
 <h2><span class="n">8</span>Limits and next steps</h2>
@@ -302,6 +300,7 @@ blockquote cite { display: block; font-family: 'Helvetica Neue', Arial, sans-ser
   <li><b>Data that isn't public:</b> evictions are by census tract, not by landlord; there are no open APIs for code violations or crime; 311 data exists only where towns use SeeClickFix; previous tenants' history is private (the app asks the landlord instead).</li>
   <li><b>Address matching:</b> the geocoder sometimes places an address across a town line; the app then also tries the postal city, but rare misses remain and are reported as gaps.</li>
   <li><b>Not legal advice;</b> accuracy was measured on three synthetic leases with an answer key; real leases are messier. Scanned (image-only) PDFs are not read.</li>
+  <li><b>Not yet tested with renters:</b> results above come from benchmarks and test leases, not user sessions. The app includes a study kit (<code>/study</code>) for timing renters by hand vs. with the app.</li>
   <li><b>Provider stalls:</b> in {{n_slow}} of {{n_bench}} benchmark runs the AI service was slow; the per-call deadline recovers automatically.</li>
 </ul>
 <p><b>With another month:</b> a hosted version with saved reports, offered through a university housing office or the CT Fair Housing Center; landlord-level court history by owner LLC (where terms allow); OCR for scanned leases; a rent-fairness check against HUD Fair Market Rents (HUD's site blocked automated download during this project); and a landlord-network view linking LLCs that share principals.</p>
