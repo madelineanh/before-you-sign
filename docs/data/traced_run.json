@@ -1,6 +1,6 @@
 {
-  "job_id": "3578ce6a0e",
-  "when": "2026-10-13T23:34:33.413648+00:00",
+  "job_id": "742c1fbd34",
+  "when": "2026-10-20T03:27:20.750044+00:00",
   "address_input": "224 Wooster St, New Haven, CT",
   "has_lease": true,
   "status": "done",
@@ -21,59 +21,59 @@
       "t": 0.0,
       "kind": "agent_start",
       "agent": "Lead Advisor",
-      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nLease uploaded: yes\nPlease run the full check and write the renter's report."
+      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nLease uploaded: yes\nREPORT LANGUAGE: English\nPlease run the full check and write the renter's report."
     },
     {
-      "t": 3.99,
+      "t": 3.52,
       "kind": "model_response",
       "agent": "Lead Advisor",
       "tool_calls": [
         {
           "tool": "ask_landlord_investigator",
           "args": {
-            "task": "Research the current owner and ownership entities for 224 WOOSTER ST, NEW HAVEN, CT 06511, including portfolio, company status, and people behind them. Return actionable findings with exact evidence IDs."
+            "task": "Research the owner and ownership entities for 224 WOOSTER ST, NEW HAVEN, CT, 06511. Check active status, portfolio, and people/companies behind them. Return findings with evidence IDs."
           }
         },
         {
           "tool": "ask_neighborhood_scout",
           "args": {
-            "task": "Check 311 reports, eviction filings, and flood risk for 224 WOOSTER ST, NEW HAVEN, CT 06511. Return actionable findings with exact evidence IDs and note any data limitations."
+            "task": "Check 311 reports, eviction filings, and flood risk for 224 WOOSTER ST, NEW HAVEN, CT, 06511. Return findings with evidence IDs."
           }
         },
         {
           "tool": "ask_lease_reviewer",
           "args": {
-            "task": "Review the uploaded lease for the renter at 224 WOOSTER ST, NEW HAVEN, CT 06511 against Connecticut law. Identify illegal or risky clauses, preserve exact lease quotes where relevant, and provide evidence IDs."
+            "task": "Review the uploaded lease for 224 WOOSTER ST, NEW HAVEN, CT, 06511 against Connecticut law. Identify illegal or risky clauses and reassuring terms, with evidence IDs."
           }
         }
       ],
       "text": "",
       "usage": {
-        "input": 920,
+        "input": 1126,
         "cached": 0,
-        "output": 198
+        "output": 185
       }
     },
     {
-      "t": 3.99,
+      "t": 3.52,
       "kind": "agent_start",
       "agent": "Landlord Investigator",
-      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nTask from the Lead Advisor: Research the current owner and ownership entities for 224 WOOSTER ST, NEW HAVEN, CT 06511, including portfolio, company status, and people behind them. Return actionable findings with exact evidence IDs."
+      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nTask from the Lead Advisor: Research the owner and ownership entities for 224 WOOSTER ST, NEW HAVEN, CT, 06511. Check active status, portfolio, and people/companies behind them. Return findings with evidence IDs."
     },
     {
-      "t": 3.99,
+      "t": 3.52,
       "kind": "agent_start",
       "agent": "Neighborhood Scout",
-      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nTask from the Lead Advisor: Check 311 reports, eviction filings, and flood risk for 224 WOOSTER ST, NEW HAVEN, CT 06511. Return actionable findings with exact evidence IDs and note any data limitations."
+      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nTask from the Lead Advisor: Check 311 reports, eviction filings, and flood risk for 224 WOOSTER ST, NEW HAVEN, CT, 06511. Return findings with evidence IDs."
     },
     {
-      "t": 3.99,
+      "t": 3.52,
       "kind": "agent_start",
       "agent": "Lease Reviewer",
-      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nTask from the Lead Advisor: Review the uploaded lease for the renter at 224 WOOSTER ST, NEW HAVEN, CT 06511 against Connecticut law. Identify illegal or risky clauses, preserve exact lease quotes where relevant, and provide evidence IDs."
+      "prompt": "Renter's address: 224 WOOSTER ST, NEW HAVEN, CT, 06511\nTask from the Lead Advisor: Review the uploaded lease for 224 WOOSTER ST, NEW HAVEN, CT, 06511 against Connecticut law. Identify illegal or risky clauses and reassuring terms, with evidence IDs."
     },
     {
-      "t": 5.85,
+      "t": 5.48,
       "kind": "model_response",
       "agent": "Landlord Investigator",
       "tool_calls": [
@@ -84,20 +84,44 @@
       ],
       "text": "",
       "usage": {
-        "input": 834,
+        "input": 843,
         "cached": 0,
         "output": 15
       }
     },
     {
-      "t": 5.86,
+      "t": 5.48,
       "kind": "tool_result",
       "agent": "Landlord Investigator",
       "tool": "get_property_records",
       "result": "{\"evidence_id\":\"E1\",\"parcels\":[{\"location\":\"224 WOOSTER ST\",\"owner\":\"SFR 2 DE LLC\",\"co_owner\":null,\"owner_mailing_address\":\"399 WHALLEY AVE, SUITE 103, NEW HAVEN, CT\",\"property_use\":\"APT5 - 12  MDL-94\",\"units\":null,\"year_built\":\"1880\",\"condition\":\"Average\",\"assessed_value_usd\":787640,\"appraised_value_usd\":1125200,\"last_sale_date\":\"5/17/2021\",\"last_sale_price_usd\":1000000,\"sold_by\":\"DDM PROPERTIES ... (+97 chars)"
     },
     {
-      "t": 6.34,
+      "t": 5.49,
+      "kind": "model_response",
+      "agent": "Lease Reviewer",
+      "tool_calls": [
+        {
+          "tool": "read_lease",
+          "args": {}
+        }
+      ],
+      "text": "",
+      "usage": {
+        "input": 2717,
+        "cached": 2521,
+        "output": 15
+      }
+    },
+    {
+      "t": 5.49,
+      "kind": "tool_result",
+      "agent": "Lease Reviewer",
+      "tool": "read_lease",
+      "result": "[text withheld from logs]"
+    },
+    {
+      "t": 5.62,
       "kind": "model_response",
       "agent": "Neighborhood Scout",
       "tool_calls": [
@@ -116,58 +140,34 @@
       ],
       "text": "",
       "usage": {
-        "input": 720,
+        "input": 767,
         "cached": 0,
         "output": 61
       }
     },
     {
-      "t": 6.36,
+      "t": 5.64,
       "kind": "tool_result",
       "agent": "Neighborhood Scout",
       "tool": "get_311_reports",
-      "result": "{\"evidence_id\":\"E2\",\"search_area\":\"about 150 m around the address, last 24 months\",\"total_reports\":225,\"reports_analyzed\":225,\"counts_by_type\":{\"Parking Violation\":42,\"Parks Request\":31,\"Missed Trash/Recycling\":24,\"SNOW RELATED\":19,\"Private Property Issue\":12,\"Signs\":11,\"Illegal Dumping\":11,\"Deceased Animals\":8,\"Public Space - Snow Related\":7,\"Sidewalks and Curb damage\":6,\"Potholes\":6,\"Tree Reques... (+6450 chars)"
+      "result": "{\"evidence_id\":\"E2\",\"search_area\":\"about 150 m around the address, last 24 months\",\"total_reports\":222,\"reports_analyzed\":222,\"counts_by_type\":{\"Parking Violation\":42,\"Parks Request\":30,\"Missed Trash/Recycling\":23,\"SNOW RELATED\":19,\"Private Property Issue\":12,\"Signs\":11,\"Illegal Dumping\":11,\"Deceased Animals\":8,\"Public Space - Snow Related\":7,\"Sidewalks and Curb damage\":6,\"Potholes\":6,\"Tree Reques... (+6450 chars)"
     },
     {
-      "t": 6.36,
+      "t": 5.64,
       "kind": "tool_result",
       "agent": "Neighborhood Scout",
       "tool": "get_eviction_filings",
       "result": "{\"evidence_id\":\"E3\",\"tract\":\"09009142200\",\"found\":true,\"period\":\"52 weeks ending 2026-08-02\",\"filings_in_tract\":16,\"filings_in_tract_prior_52_weeks\":10,\"county_tracts_compared\":197,\"county_median_tract_filings\":13,\"percent_of_county_tracts_with_fewer_filings\":55,\"note\":\"Counts are eviction filings (court cases started), not completed evictions, and they are not adjusted for how many renters live i... (+15 chars)"
     },
     {
-      "t": 6.36,
+      "t": 5.64,
       "kind": "tool_result",
       "agent": "Neighborhood Scout",
       "tool": "get_flood_zone",
       "result": "{\"evidence_id\":\"E4\",\"zone\":\"X\",\"zone_subtype\":\"AREA OF MINIMAL FLOOD HAZARD\",\"meaning\":\"Minimal flood hazard (outside the 1% and 0.2% annual-chance floodplains, or shaded X: moderate).\"}"
     },
     {
-      "t": 7.03,
-      "kind": "model_response",
-      "agent": "Lease Reviewer",
-      "tool_calls": [
-        {
-          "tool": "read_lease",
-          "args": {}
-        }
-      ],
-      "text": "",
-      "usage": {
-        "input": 2723,
-        "cached": 0,
-        "output": 15
-      }
-    },
-    {
-      "t": 7.04,
-      "kind": "tool_result",
-      "agent": "Lease Reviewer",
-      "tool": "read_lease",
-      "result": "[lease text withheld from logs]"
-    },
-    {
-      "t": 7.56,
+      "t": 7.62,
       "kind": "model_response",
       "agent": "Landlord Investigator",
       "tool_calls": [
@@ -186,27 +186,27 @@
       ],
       "text": "",
       "usage": {
-        "input": 1028,
+        "input": 1037,
         "cached": 0,
         "output": 63
       }
     },
     {
-      "t": 7.56,
+      "t": 7.62,
       "kind": "tool_result",
       "agent": "Landlord Investigator",
       "tool": "get_owner_portfolio",
-      "result": "{\"evidence_id\":\"E5\",\"owner\":\"SFR 2 DE LLC\",\"new_haven_parcels\":113,\"total_assessed_value_usd\":19227530,\"largest_holdings\":[{\"location\":\"224 WOOSTER ST\",\"use\":\"APT5 - 12  MDL-94\",\"assessed_value_usd\":787640},{\"location\":\"43 WILLIAM ST\",\"use\":\"APT5 - 12  MDL-94\",\"assessed_value_usd\":556010},{\"location\":\"37 WILLIAM ST\",\"use\":\"APT5 - 12  MDL-94\",\"assessed_value_usd\":555170},{\"location\":\"32 CLINTON AV\"... (+534 chars)"
+      "result": "{\"evidence_id\":\"E5\",\"owner\":\"SFR 2 DE LLC\",\"connecticut_parcels\":127,\"towns\":3,\"parcels_by_town\":{\"New Haven\":113,\"Hamden\":11,\"West Haven\":3},\"total_assessed_value_usd\":22426670,\"largest_holdings\":[{\"location\":\"224 WOOSTER ST\",\"town\":\"New Haven\",\"use\":\"APT5 - 12  MDL-94\",\"assessed_value_usd\":787640},{\"location\":\"43 WILLIAM ST\",\"town\":\"New Haven\",\"use\":\"APT5 - 12  MDL-94\",\"assessed_value_usd\":55601... (+788 chars)"
     },
     {
-      "t": 7.56,
+      "t": 7.62,
       "kind": "tool_result",
       "agent": "Landlord Investigator",
       "tool": "search_business_registry",
       "result": "{\"evidence_id\":\"E6\",\"matches\":[{\"business_id\":\"001t000000hJuPiAAK\",\"name\":\"SFR 2 DE LLC\",\"status\":\"Active\",\"registered_on\":\"2021-03-01\",\"mailing_address\":\"PO BOX 3616,,WOODBRIDGE,CT,United States,06525\",\"exact_match\":true}]}"
     },
     {
-      "t": 10.27,
+      "t": 7.67,
       "kind": "model_response",
       "agent": "Lease Reviewer",
       "tool_calls": [
@@ -244,41 +244,41 @@
       ],
       "text": "",
       "usage": {
-        "input": 3277,
-        "cached": 2597,
+        "input": 3267,
+        "cached": 2591,
         "output": 157
       }
     },
     {
-      "t": 10.27,
+      "t": 7.67,
       "kind": "tool_result",
       "agent": "Lease Reviewer",
       "tool": "check_security_deposit",
       "result": "{\"evidence_id\":\"E7\",\"deposit_usd\":5400.0,\"monthly_rent_usd\":1800.0,\"deposit_in_months_of_rent\":3.0,\"legal_maximum_usd\":3600.0,\"amount_over_limit_usd\":1800.0,\"within_limit\":false,\"rule\":\"CT-47a-21-b\"}"
     },
     {
-      "t": 10.27,
+      "t": 7.67,
       "kind": "tool_result",
       "agent": "Lease Reviewer",
       "tool": "check_late_fee",
       "result": "{\"evidence_id\":\"E8\",\"monthly_rent_usd\":1800.0,\"lease_late_fee_usd\":100.0,\"lease_fee_is_per_day\":true,\"lease_maximum_late_fee_usd\":null,\"five_percent_of_rent_usd\":90.0,\"legal_maximum_late_fee_usd\":50.0,\"amount_within_limit\":false,\"days_lease_allows_without_fee\":4,\"legal_grace_period_days\":9,\"respects_grace_period\":false,\"rules\":[\"CT-47a-15a-a\",\"CT-47a-15a-b\",\"CT-47a-4-a8\",\"CT-47a-4-a9\"]}"
     },
     {
-      "t": 10.27,
+      "t": 7.67,
       "kind": "tool_result",
       "agent": "Lease Reviewer",
       "tool": "check_upfront_fees",
       "result": "{\"evidence_id\":\"E9\",\"fee_name\":\"application processing fee\",\"fee_usd\":150.0,\"verdict\":\"not allowed: Connecticut bans application, processing, move-in and move-out fees; only a screening-report fee is allowed\",\"above_base_50_usd_screening_cap\":null,\"rule\":\"CT-47a-4d\"}"
     },
     {
-      "t": 10.27,
+      "t": 7.67,
       "kind": "tool_result",
       "agent": "Lease Reviewer",
       "tool": "check_upfront_fees",
       "result": "{\"evidence_id\":\"E10\",\"fee_name\":\"move-in fee\",\"fee_usd\":250.0,\"verdict\":\"not allowed: Connecticut bans application, processing, move-in and move-out fees; only a screening-report fee is allowed\",\"above_base_50_usd_screening_cap\":null,\"rule\":\"CT-47a-4d\"}"
     },
     {
-      "t": 11.41,
+      "t": 8.89,
       "kind": "model_response",
       "agent": "Landlord Investigator",
       "tool_calls": [
@@ -291,37 +291,37 @@
       ],
       "text": "",
       "usage": {
-        "input": 1514,
+        "input": 1593,
         "cached": 0,
         "output": 30
       }
     },
     {
-      "t": 11.42,
+      "t": 8.89,
       "kind": "tool_result",
       "agent": "Landlord Investigator",
       "tool": "get_company_principals",
       "result": "{\"evidence_id\":\"E11\",\"principals\":[{\"name\":\"SFR 2 DE Pledgor LLC\",\"title\":null,\"city\":\"NEW HAVEN, CT\"}]}"
     },
     {
-      "t": 11.88,
+      "t": 10.14,
       "kind": "model_response",
       "agent": "Neighborhood Scout",
       "tool_calls": [],
       "text": "",
       "usage": {
-        "input": 2669,
-        "cached": 0,
-        "output": 479
+        "input": 2716,
+        "cached": 2590,
+        "output": 473
       }
     },
     {
-      "t": 11.88,
+      "t": 10.15,
       "kind": "agent_done",
       "agent": "Neighborhood Scout"
     },
     {
-      "t": 13.42,
+      "t": 11.17,
       "kind": "model_response",
       "agent": "Landlord Investigator",
       "tool_calls": [
@@ -334,128 +334,127 @@
       ],
       "text": "",
       "usage": {
-        "input": 1595,
-        "cached": 1388,
+        "input": 1674,
+        "cached": 1467,
         "output": 28
       }
     },
     {
-      "t": 13.42,
+      "t": 11.18,
       "kind": "tool_result",
       "agent": "Landlord Investigator",
       "tool": "search_business_registry",
       "result": "{\"result\":\"No matching company in the Connecticut business registry.\"}"
     },
     {
-      "t": 18.58,
-      "kind": "model_response",
-      "agent": "Lease Reviewer",
-      "tool_calls": [],
-      "text": "",
-      "usage": {
-        "input": 3849,
-        "cached": 3151,
-        "output": 1230
-      }
-    },
-    {
-      "t": 18.59,
-      "kind": "safety",
-      "type": "fact_check_retry",
-      "agent": "Lease Reviewer",
-      "detail": "Sent 2 finding(s) back for correction",
-      "problems": [
-        "'Application and move-in fees prohibited' quotes text that does not appear word-for-word in its cited evidence: \" application processing fee and a \". Quote exactly or paraphrase without quotation marks.",
-        "'Tenant assigned all repair responsibility' cites evidence IDs that do not exist: ['CT-47a-7(a)'].",
-        "Valid IDs are the evidence_id values your tools returned, LEASE (if a lease was read), and these law IDs exactly as written: CT-47a-4-a1, CT-47a-4-a2, CT-47a-4-a3, CT-47a-4-a4, CT-47a-4-a5, CT-47a-4-a6, CT-47a-4-a7, CT-47a-4-a8, CT-47a-4-a9, CT-47a-4-a10, CT-47a-15a-a, CT-47a-15a-b, CT-47a-16, CT-47a-4d, CT-47a-4c, CT-47a-4e, CT-47a-6, CT-47a-7, CT-47a-21-b, CT-47a-21-d."
-      ]
-    },
-    {
-      "t": 18.59,
-      "kind": "retry",
-      "agent": "Lease Reviewer",
-      "tool": "final_result",
-      "message": "Fact check failed. Fix these findings and return the full report again:\n- 'Application and move-in fees prohibited' quotes text that does not appear word-for-word in its cited evidence: \" application processing fee and a \". Quote exactly or paraphrase without quotation marks.\n- 'Tenant assigned all repair responsibility' cites evidence IDs that do not exist: ['CT-47a-7(a)'].\n- Valid IDs are the evidence_id values your tools returned, LEASE (if a lease was read), and these law IDs exactly as writ... (+284 chars)"
-    },
-    {
-      "t": 18.59,
+      "t": 16.79,
       "kind": "model_response",
       "agent": "Landlord Investigator",
       "tool_calls": [],
       "text": "",
       "usage": {
-        "input": 1648,
-        "cached": 1469,
-        "output": 545
+        "input": 1727,
+        "cached": 1548,
+        "output": 524
       }
     },
     {
-      "t": 18.61,
+      "t": 16.79,
       "kind": "agent_done",
       "agent": "Landlord Investigator"
     },
     {
-      "t": 26.53,
+      "t": 19.45,
       "kind": "model_response",
       "agent": "Lease Reviewer",
       "tool_calls": [],
       "text": "",
       "usage": {
-        "input": 5375,
-        "cached": 3723,
-        "output": 1171
+        "input": 3839,
+        "cached": 3141,
+        "output": 1251
       }
     },
     {
-      "t": 26.53,
+      "t": 19.46,
+      "kind": "safety",
+      "type": "fact_check_retry",
+      "agent": "Lease Reviewer",
+      "detail": "Sent 1 finding(s) back for correction",
+      "problems": [
+        "'Tenant made responsible for all repairs' cites evidence IDs that do not exist: ['CT-47a-7(a)', 'CT-47a-7(c)', 'CT-47a-7(d)'].",
+        "Valid IDs are the evidence_id values your tools returned, LEASE (if a lease was read), and these law IDs exactly as written: CT-47a-4-a1, CT-47a-4-a2, CT-47a-4-a3, CT-47a-4-a4, CT-47a-4-a5, CT-47a-4-a6, CT-47a-4-a7, CT-47a-4-a8, CT-47a-4-a9, CT-47a-4-a10, CT-47a-15a-a, CT-47a-15a-b, CT-47a-16, CT-47a-4d, CT-47a-4c, CT-47a-4e, CT-47a-6, CT-47a-7, CT-47a-21-b, CT-47a-21-d."
+      ]
+    },
+    {
+      "t": 19.46,
+      "kind": "retry",
+      "agent": "Lease Reviewer",
+      "tool": "final_result",
+      "message": "Fact check failed. Fix these findings and return the full report again:\n- 'Tenant made responsible for all repairs' cites evidence IDs that do not exist: ['CT-47a-7(a)', 'CT-47a-7(c)', 'CT-47a-7(d)'].\n- Valid IDs are the evidence_id values your tools returned, LEASE (if a lease was read), and these law IDs exactly as written: CT-47a-4-a1, CT-47a-4-a2, CT-47a-4-a3, CT-47a-4-a4, CT-47a-4-a5, CT-47a-4-a6, CT-47a-4-a7, CT-47a-4-a8, CT-47a-4-a9, CT-47a-4-a10, CT-47a-15a-a, CT-47a-15a-b, CT-47a-16, CT... (+107 chars)"
+    },
+    {
+      "t": 28.69,
+      "kind": "model_response",
+      "agent": "Lease Reviewer",
+      "tool_calls": [],
+      "text": "",
+      "usage": {
+        "input": 5366,
+        "cached": 3713,
+        "output": 1231
+      }
+    },
+    {
+      "t": 28.69,
       "kind": "agent_done",
       "agent": "Lease Reviewer"
     },
     {
-      "t": 26.53,
+      "t": 28.7,
       "kind": "tool_result",
       "agent": "Lead Advisor",
       "tool": "ask_landlord_investigator",
-      "result": "{\"summary\":\"The assessor identifies SFR 2 DE LLC as the current owner of 224 WOOSTER ST, and the registry lists that company as Active. It holds 113 New Haven parcels; the registry names SFR 2 DE Pledgor LLC as a principal, but no Connecticut registry match was found for that entity, so the people behind the ownership structure remain unclear.\",\"findings\":[{\"category\":\"landlord\",\"severity\":\"yellow... (+2127 chars)"
+      "result": "{\"summary\":\"The assessor lists SFR 2 DE LLC as the owner of 224 Wooster St; the company is Active in the Connecticut registry. Its portfolio is sizable, and the registry names SFR 2 DE Pledgor LLC as a principal, but no registry match was found for that principal, so the people or entities behind it remain unclear.\",\"findings\":[{\"category\":\"landlord\",\"severity\":\"green\",\"title\":\"Owner is an active ... (+1943 chars)"
     },
     {
-      "t": 26.53,
+      "t": 28.7,
       "kind": "tool_result",
       "agent": "Lead Advisor",
       "tool": "ask_neighborhood_scout",
-      "result": "{\"summary\":\"The reports show a few issues logged at 224 Wooster St, chiefly parking and one vehicle-theft report; nearby reports include some dumping and trash concerns, but they do not establish conditions at this building. Tract eviction filings are slightly above the county median, while FEMA maps the address in minimal-hazard Zone X.\",\"findings\":[{\"category\":\"building\",\"severity\":\"yellow\",\"tit... (+1887 chars)"
+      "result": "{\"summary\":\"The 311 results include three reports logged at 224 Wooster St: a parking complaint, a dead squirrel report, and a catalytic-converter theft report. Nearby reports include repeated trash/dumping complaints, while the tract\u2019s eviction filings are only somewhat above the county median; FEMA maps the address to minimal flood hazard zone X.\",\"findings\":[{\"category\":\"building\",\"severity\":\"y... (+1843 chars)"
     },
     {
-      "t": 26.53,
+      "t": 28.7,
       "kind": "tool_result",
       "agent": "Lead Advisor",
       "tool": "ask_lease_reviewer",
-      "result": "{\"summary\":\"The lease contains multiple clauses that conflict with Connecticut tenant protections, including an excessive security deposit and prohibited fees, an unlawful late-charge provision, and clauses purporting to permit lockouts and waive landlord liability. Ask the landlord to revise these terms in writing; this screening is not legal advice.\",\"findings\":[{\"category\":\"lease\",\"severity\":\"r... (+4929 chars)"
+      "result": "{\"summary\":\"The lease contains multiple terms that conflict with Connecticut tenant protections, including an excessive deposit, an early and excessive late fee, prohibited fees, a heat surcharge despite heat being included, and broad waivers of landlord duties and tenant rights. Ask the landlord to remove or revise these terms in writing before signing; several are unenforceable under the cited s... (+5245 chars)"
     },
     {
-      "t": 80.64,
+      "t": 45.41,
       "kind": "model_response",
       "agent": "Lead Advisor",
       "tool_calls": [],
       "text": "",
       "usage": {
-        "input": 3313,
-        "cached": 3187,
-        "output": 1674
+        "input": 3539,
+        "cached": 0,
+        "output": 1863
       }
     },
     {
-      "t": 80.64,
+      "t": 45.42,
       "kind": "agent_done",
       "agent": "Lead Advisor"
     },
     {
-      "t": 80.64,
+      "t": 45.42,
       "kind": "status",
       "message": "Report ready"
     },
     {
-      "t": 80.64,
+      "t": 45.42,
       "kind": "finished",
       "status": "done",
       "error": null
@@ -468,23 +467,24 @@
       "street_name": "WOOSTER",
       "pre_direction": "",
       "city": "NEW HAVEN",
+      "town": "New Haven",
       "state": "CT",
       "zip": "06511",
       "lat": 41.302852001704,
       "lng": -72.919444602068,
-      "tract_geoid": "09170142200",
+      "tract_geoid": "09009142200",
       "tract_name": "Census Tract 1422"
     },
     "report": {
       "verdict": "Serious concerns",
-      "headline": "Do not sign this lease as written: it contains numerous terms the reviewer flagged as unlawful under Connecticut tenant protections.",
-      "summary": "The biggest concern is the lease: it includes multiple clauses the reviewer says conflict with Connecticut law, including the deposit amount, prohibited fees, lockout language, and repair and liability terms. The owner is listed as active, and the address is in FEMA Zone X, but neither offsets the need to have the lease corrected in writing. This is a screening, not legal advice; consider getting free legal help before signing or paying.",
+      "headline": "Do not sign this lease as written: it contains multiple terms that conflict with Connecticut tenant protections.",
+      "summary": "The most urgent issue is the lease, which includes several terms the reviewer says are prohibited or unenforceable under Connecticut law. Public records also leave the ownership chain unclear, and the building and nearby area have some items worth asking about. Request corrected lease terms in writing before signing; this is not legal advice, and a free legal aid service can help with the lease concerns.",
       "findings": [
         {
           "category": "lease",
           "severity": "red",
-          "title": "Security deposit exceeds legal cap",
-          "detail": "The lease demands \"$5,400\" against monthly rent of $1,800, above the two-month maximum for a tenant under 62. The excess is not permitted; for a tenant age 62 or older, the applicable maximum is lower. Ask for the deposit to be reduced to the applicable limit.",
+          "title": "Security deposit exceeds legal maximum",
+          "detail": "The lease demands $5,400, equal to three months' rent, while the calculated maximum for a tenant under 62 is $3,600. The excess $1,800 is above Connecticut's limit; ask for the deposit to be reduced. If you are 62 or older, the permitted limit is lower still.",
           "evidence_ids": [
             "LEASE",
             "E7",
@@ -494,8 +494,8 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Late fee starts too soon and is too high",
-          "detail": "The lease says rent must be received by the 5th to avoid a fee, but Connecticut provides a 9-day grace period for this monthly tenancy. The $100 fee plus $10 per additional day exceeds the cap and charges repeatedly; ask for a compliant clause allowing only one fee after the grace period.",
+          "title": "Late fee starts too early and is too high",
+          "detail": "The lease imposes a fee after four days and charges $100 plus $10 per additional day. Connecticut requires a nine-day grace period for monthly rent and limits a single late fee to the lesser of $5 per day up to $50 or 5% of late rent; this clause is unenforceable to the extent it conflicts with those limits.",
           "evidence_ids": [
             "LEASE",
             "E8",
@@ -508,8 +508,8 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Application and move-in fees prohibited",
-          "detail": "The lease imposes an application processing fee of $150 and a move-in fee of $250. Connecticut prohibits these categories of fees; ask for both to be removed.",
+          "title": "Application and move-in fees are prohibited",
+          "detail": "The lease charges a $150 application processing fee and a $250 move-in fee. Connecticut prohibits these fees; only specified charges, including a qualifying tenant screening report fee, are allowed, so ask that both charges be removed.",
           "evidence_ids": [
             "LEASE",
             "E9",
@@ -520,18 +520,8 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Deposit-interest waiver unenforceable",
-          "detail": "The clause \"Tenant waives any right to interest on the security deposit\" attempts to waive a statutory tenant right and is unenforceable. Ask the landlord to delete it.",
-          "evidence_ids": [
-            "LEASE",
-            "CT-47a-4-a4"
-          ]
-        },
-        {
-          "category": "lease",
-          "severity": "red",
-          "title": "Heating surcharge despite included heat",
-          "detail": "The lease includes heat but also imposes a $75 monthly heating surcharge from November through March. Connecticut prohibits a heat surcharge when heat is included; ask to remove it.",
+          "title": "Heat surcharge conflicts with included heat",
+          "detail": "The lease says heat is included in rent but also requires a $75 monthly heating surcharge from November through March. Connecticut prohibits a heat or utility surcharge when that service is included in the lease, so ask to remove the surcharge.",
           "evidence_ids": [
             "LEASE",
             "CT-47a-4-a10"
@@ -540,8 +530,8 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Tenant assigned all repair responsibility",
-          "detail": "The lease makes the tenant responsible for all repairs, including plumbing, heating, and electrical systems, regardless of cause. That blanket transfer conflicts with the landlord's statutory repair and habitability duties; ask for it to be replaced with terms that preserve those duties.",
+          "title": "Tenant made responsible for all repairs",
+          "detail": "The lease makes you responsible for every repair, including plumbing, heating, and electrical systems, regardless of cause. That broad transfer conflicts with the landlord's statutory repair and habitability duties and is unenforceable to that extent; ask for the clause to preserve the landlord's required duties.",
           "evidence_ids": [
             "LEASE",
             "CT-47a-7"
@@ -550,8 +540,8 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Unrestricted entry clause",
-          "detail": "The clause allows entry \"at any time, with or without notice, for any purpose.\" Connecticut generally requires reasonable notice and reasonable times, and entry without consent is limited to specified circumstances; ask for revision.",
+          "title": "Entry allowed without notice or limits",
+          "detail": "The landlord claims a right to enter at any time, without notice, for any purpose. Connecticut generally requires reasonable notice and reasonable times, with entry without consent limited to specified circumstances; ask for the clause to be replaced with a lawful entry provision.",
           "evidence_ids": [
             "LEASE",
             "CT-47a-16"
@@ -560,18 +550,8 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Landlord liability waiver and indemnity",
-          "detail": "The lease attempts to excuse landlord liability even for negligence and requires the tenant to indemnify the landlord for related claims. Connecticut prohibits clauses that limit the landlord's legal liability or shift that liability and its costs to the tenant; ask to remove this clause.",
-          "evidence_ids": [
-            "LEASE",
-            "CT-47a-4-a3"
-          ]
-        },
-        {
-          "category": "lease",
-          "severity": "red",
           "title": "Lockout and property removal without court",
-          "detail": "The lease claims the landlord may change locks and remove belongings without court action. That clause is unenforceable: the landlord may not dispossess a tenant without a court order. Ask to delete it.",
+          "detail": "The lease purports to let the landlord change the locks and remove your belongings without court action. A landlord may not dispossess a tenant without a court order, making this clause unenforceable; ask that it be deleted.",
           "evidence_ids": [
             "LEASE",
             "CT-47a-4-a5"
@@ -580,18 +560,18 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Attorney-fee obligation is overly broad",
-          "detail": "The lease requires all landlord attorney's fees and collection costs \"in full.\" Connecticut bars requiring the tenant to pay attorney's fees above 15 percent of a money-damages judgment; ask that the clause be limited to the statutory amount and circumstances.",
+          "title": "Landlord liability waiver and indemnity",
+          "detail": "The lease attempts to excuse the landlord from liability even for the landlord's negligence and makes you indemnify the landlord for all such claims. Connecticut prohibits waiving or shifting the landlord's legal liability this way, so ask to remove this clause.",
           "evidence_ids": [
             "LEASE",
-            "CT-47a-4-a7"
+            "CT-47a-4-a3"
           ]
         },
         {
           "category": "lease",
           "severity": "red",
-          "title": "Broad waiver of tenant rights",
-          "detail": "The lease says the tenant waives all rights and remedies under Chapter 830. Connecticut prohibits lease terms that waive tenant protections under the landlord-tenant statutes, so this waiver is unenforceable; ask for it to be removed.",
+          "title": "Waiver of statutory tenant rights",
+          "detail": "The lease says you waive all rights and remedies under Chapter 830. Connecticut prohibits lease terms that waive tenant protections under landlord-tenant statutes, and the waiver is unenforceable; ask for it to be removed.",
           "evidence_ids": [
             "LEASE",
             "CT-47a-4-a1"
@@ -600,8 +580,18 @@
         {
           "category": "lease",
           "severity": "red",
-          "title": "Electronic payment required as sole method",
-          "detail": "The lease requires rent to be paid only by automatic electronic debit and rejects checks or money orders. Connecticut prohibits requiring electronic funds transfer as the only payment method; ask that a non-electronic option be added.",
+          "title": "Attorney fees are not limited",
+          "detail": "The lease requires you to pay all of the landlord's attorney's fees and collection costs in full in any dispute. Connecticut bars requiring attorney's fees above 15% of a judgment for money damages in the circumstances covered by the statute; ask for the clause to be limited to the statutory rule.",
+          "evidence_ids": [
+            "LEASE",
+            "CT-47a-4-a7"
+          ]
+        },
+        {
+          "category": "lease",
+          "severity": "red",
+          "title": "Electronic-only rent payment",
+          "detail": "The lease requires automatic electronic debit and rejects checks and money orders. Connecticut prohibits requiring electronic funds transfer as the only rent-payment method; ask for a non-electronic payment option.",
           "evidence_ids": [
             "LEASE",
             "CT-47a-4c"
@@ -610,17 +600,8 @@
         {
           "category": "landlord",
           "severity": "yellow",
-          "title": "Large local property portfolio",
-          "detail": "SFR 2 DE LLC holds 113 New Haven parcels, indicating a substantial portfolio. Ask who handles maintenance and emergencies at this building, and how quickly requests are addressed.",
-          "evidence_ids": [
-            "E5"
-          ]
-        },
-        {
-          "category": "landlord",
-          "severity": "yellow",
-          "title": "Ownership chain remains unclear",
-          "detail": "The registry lists SFR 2 DE Pledgor LLC as a principal, but a search returned no matching Connecticut registry record. Ask the landlord to identify the responsible property manager and the person or entity authorized to handle lease and maintenance issues.",
+          "title": "Ownership chain not fully identified",
+          "detail": "The registry lists SFR 2 DE Pledgor LLC as a principal of SFR 2 DE LLC, but a Connecticut registry search returned no match for that principal. The available records therefore do not identify the people or further entities behind it.",
           "evidence_ids": [
             "E11"
           ]
@@ -628,40 +609,73 @@
         {
           "category": "building",
           "severity": "yellow",
-          "title": "A few reports logged at this address",
-          "detail": "Three 311 reports were recorded at 224 Wooster St: a parking violation, a deceased animal, and a stolen catalytic converter report. These do not indicate a reported housing, heat, or pest complaint, but ask the landlord about building access, lighting, and any security measures if those matter to you.",
+          "title": "Older building; average condition",
+          "detail": "The assessor records the building as built in 1880 and in Average condition. Ask about recent plumbing, electrical, heating, and roof work, and what repairs are planned.",
+          "evidence_ids": [
+            "E1"
+          ]
+        },
+        {
+          "category": "building",
+          "severity": "yellow",
+          "title": "Three reports logged at the address",
+          "detail": "The address itself had reports for a parking violation, a dead squirrel, and a stolen catalytic converter; the theft report is listed as open. These reports do not establish a building problem, but ask about any recent security or pest issues and inspect the immediate area.",
           "evidence_ids": [
             "E2"
           ]
         },
         {
+          "category": "landlord",
+          "severity": "yellow",
+          "title": "Large Connecticut portfolio",
+          "detail": "The owner holds 127 Connecticut parcels across 3 towns, with 113 in New Haven. Ask who handles repairs at this building, how maintenance requests are tracked, and who is authorized to respond locally.",
+          "evidence_ids": [
+            "E5"
+          ]
+        },
+        {
           "category": "neighborhood",
           "severity": "yellow",
-          "title": "Tract filings slightly above county median",
-          "detail": "The tract recorded 16 eviction filings in the latest 52-week period, compared with a county tract median of 13. These are filings, not completed evictions, and are not adjusted for the number of renters, so they describe the area rather than this landlord.",
+          "title": "Nearby trash and dumping complaints",
+          "detail": "The 311 results show 11 illegal-dumping reports and 23 missed-trash/recycling reports across the search area, with several reports on nearby Wooster and Olive streets. Ask how trash is handled and check the block for recurring dumping or overflow.",
           "evidence_ids": [
-            "E3"
+            "E2"
+          ]
+        },
+        {
+          "category": "landlord",
+          "severity": "green",
+          "title": "Owner is an active LLC",
+          "detail": "SFR 2 DE LLC is listed as the property owner and has Active registry status. Its registry mailing address is in Woodbridge, while the assessor lists a New Haven mailing address; confirm which address is best for notices and maintenance requests.",
+          "evidence_ids": [
+            "E1",
+            "E6"
           ]
         }
       ],
       "questions_for_landlord": [
-        "Will you remove the application processing and move-in fees and reduce the security deposit to the applicable legal maximum?",
-        "Will you revise the late-fee, heating-surcharge, repair, entry, liability, lockout, attorney-fee, and tenant-rights-waiver clauses to comply with Connecticut law?",
-        "Can you provide a non-electronic rent payment option and confirm in writing how security-deposit interest will be handled?",
-        "Who is the day-to-day property manager, and what is the after-hours emergency contact?",
+        "Will you provide a corrected lease removing or revising the flagged deposit, fees, heat surcharge, repair, entry, lockout, liability, waiver, attorney-fee, and electronic-payment terms?",
+        "Will you reduce the security deposit to the legal maximum that applies to me and remove the application processing and move-in fees?",
+        "Who is the local property manager, what mailing address should I use for notices, and how do I report urgent repairs?",
+        "Have there been recent plumbing, electrical, heating, roof, pest, security, or water-intrusion issues, and what work is planned?",
         "How long did the last tenants stay, why is the unit available, and can you put me in touch with a current or former tenant?",
-        "Have there been any past flooding, basement water intrusion, or drainage problems at the building?"
+        "How are trash storage and pickup managed, and have there been recurring dumping or overflow issues nearby?"
       ],
       "gaps": [
-        "The business registry search found no matching record for SFR 2 DE Pledgor LLC, so its status and any further principals could not be verified.",
-        "Previous tenants' history and reasons for leaving are private and are not available in public records.",
-        "Check the official sex-offender registry links shown with this report; this tool does not search people."
+        "The lease identifies the premises only by reference to Schedule A, but no Schedule A is included in the provided text, so the specific unit and property details cannot be verified.",
+        "The lease does not state the tenant's age; the deposit calculation shown assumes the tenant is under 62.",
+        "The search found no Connecticut business-registry match for SFR 2 DE Pledgor LLC, so its status and any principals could not be verified.",
+        "311 reports are resident-submitted complaints and do not independently verify conditions or outcomes.",
+        "Previous tenants' history and reasons for leaving are private and are not in public records.",
+        "Use the official sex-offender registry links displayed with this report; this tool does not search people."
       ]
     },
     "registry_links": {
       "ct_registry": "https://portal.ct.gov/services/public-safety/sex-offender-registry",
       "national_registry": "https://www.nsopw.gov/search-public-sex-offender-registries"
     },
+    "language": "en",
+    "has_lease": true,
     "evidence": [
       {
         "id": "LEASE",
@@ -676,11 +690,6 @@
       {
         "id": "CT-47a-4-a3",
         "source": "Conn. Gen. Stat. \u00a7 47a-4(a)(3): Landlord liability waivers and indemnity",
-        "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
-      },
-      {
-        "id": "CT-47a-4-a4",
-        "source": "Conn. Gen. Stat. \u00a7 47a-4(a)(4): Interest on security deposit",
         "url": "https://www.cga.ct.gov/current/pub/chap_830.htm#sec_47a-4"
       },
       {
@@ -744,19 +753,24 @@
         "url": "https://www.cga.ct.gov/current/pub/chap_831.htm#sec_47a-21"
       },
       {
+        "id": "E1",
+        "source": "CT Parcel and CAMA Data 2025 (New Haven assessor)",
+        "url": "https://data.ct.gov/d/rny9-6ak2"
+      },
+      {
         "id": "E2",
-        "source": "New Haven 311 reports (SeeClickFix)",
+        "source": "311 reports (SeeClickFix)",
         "url": "https://seeclickfix.com/new-haven"
       },
       {
-        "id": "E3",
-        "source": "CT Weekly Evictions by Census Tract (Eviction Lab / CT Fair Housing Center)",
-        "url": "https://data.ct.gov/d/j5dt-tcp7"
+        "id": "E5",
+        "source": "CT Parcel Data: all Connecticut parcels owned by SFR 2 DE LLC",
+        "url": "https://data.ct.gov/d/rny9-6ak2"
       },
       {
-        "id": "E5",
-        "source": "CT Parcel Data: all New Haven parcels owned by SFR 2 DE LLC",
-        "url": "https://data.ct.gov/d/rny9-6ak2"
+        "id": "E6",
+        "source": "CT Business Registry search: SFR 2 DE LLC",
+        "url": "https://data.ct.gov/d/n7gp-d28j"
       },
       {
         "id": "E7",
@@ -780,7 +794,7 @@
       },
       {
         "id": "E11",
-        "source": "CT Business Registry principals for business 001t000000hJuPiAAK",
+        "source": "CT Business Registry: principals of SFR 2 DE LLC",
         "url": "https://data.ct.gov/d/ka36-64k6"
       }
     ],
@@ -791,10 +805,9 @@
       {
         "type": "fact_check_retry",
         "agent": "Lease Reviewer",
-        "detail": "Sent 2 finding(s) back for correction",
+        "detail": "Sent 1 finding(s) back for correction",
         "problems": [
-          "'Application and move-in fees prohibited' quotes text that does not appear word-for-word in its cited evidence: \" application processing fee and a \". Quote exactly or paraphrase without quotation marks.",
-          "'Tenant assigned all repair responsibility' cites evidence IDs that do not exist: ['CT-47a-7(a)'].",
+          "'Tenant made responsible for all repairs' cites evidence IDs that do not exist: ['CT-47a-7(a)', 'CT-47a-7(c)', 'CT-47a-7(d)'].",
           "Valid IDs are the evidence_id values your tools returned, LEASE (if a lease was read), and these law IDs exactly as written: CT-47a-4-a1, CT-47a-4-a2, CT-47a-4-a3, CT-47a-4-a4, CT-47a-4-a5, CT-47a-4-a6, CT-47a-4-a7, CT-47a-4-a8, CT-47a-4-a9, CT-47a-4-a10, CT-47a-15a-a, CT-47a-15a-b, CT-47a-16, CT-47a-4d, CT-47a-4c, CT-47a-4e, CT-47a-6, CT-47a-7, CT-47a-21-b, CT-47a-21-d."
         ]
       }
@@ -812,67 +825,67 @@
           "agent": "Lead Advisor",
           "requests": 2,
           "tool_calls": 3,
-          "input_tokens": 4233,
-          "cache_read_tokens": 3187,
-          "cache_write_tokens": 0,
-          "output_tokens": 1872,
-          "seconds": 80.64,
-          "cost_usd": 0.001072
+          "input_tokens": 4665,
+          "cache_read_tokens": 0,
+          "cache_write_tokens": 3413,
+          "output_tokens": 2048,
+          "seconds": 45.42,
+          "cost_usd": 0.001576
         },
         {
           "agent": "Landlord Investigator",
           "requests": 5,
           "tool_calls": 5,
-          "input_tokens": 6619,
-          "cache_read_tokens": 2857,
-          "cache_write_tokens": 1522,
-          "output_tokens": 681,
-          "seconds": 14.62,
-          "cost_usd": 0.000783
+          "input_tokens": 6874,
+          "cache_read_tokens": 3015,
+          "cache_write_tokens": 1601,
+          "output_tokens": 660,
+          "seconds": 13.27,
+          "cost_usd": 0.000786
         },
         {
           "agent": "Neighborhood Scout",
           "requests": 2,
           "tool_calls": 3,
-          "input_tokens": 3389,
-          "cache_read_tokens": 0,
-          "cache_write_tokens": 2543,
-          "output_tokens": 540,
-          "seconds": 7.9,
-          "cost_usd": 0.000672
+          "input_tokens": 3483,
+          "cache_read_tokens": 2590,
+          "cache_write_tokens": 0,
+          "output_tokens": 534,
+          "seconds": 6.63,
+          "cost_usd": 0.000382
         },
         {
           "agent": "Lease Reviewer",
           "requests": 4,
           "tool_calls": 5,
-          "input_tokens": 15224,
-          "cache_read_tokens": 9471,
-          "cache_write_tokens": 5249,
-          "output_tokens": 2573,
-          "seconds": 22.54,
-          "cost_usd": 0.002088
+          "input_tokens": 15189,
+          "cache_read_tokens": 11966,
+          "cache_write_tokens": 2719,
+          "output_tokens": 2654,
+          "seconds": 25.18,
+          "cost_usd": 0.001837
         }
       ],
       "totals": {
         "requests": 13,
         "tool_calls": 16,
-        "input_tokens": 29465,
-        "cache_read_tokens": 15515,
-        "cache_write_tokens": 9314,
-        "output_tokens": 5666,
-        "cost_usd": 0.004616
+        "input_tokens": 30211,
+        "cache_read_tokens": 17571,
+        "cache_write_tokens": 7733,
+        "output_tokens": 5896,
+        "cost_usd": 0.004581
       }
     },
-    "seconds": 80.6
+    "seconds": 45.4
   },
   "evidence": {
     "LEASE": {
       "source": "Uploaded lease (after safety filter)",
       "url": null,
       "data": {
-        "withheld": "lease text is not saved",
-        "characters": 2134,
-        "sha256": "892764e993be36e6"
+        "withheld": "text is not saved",
+        "characters": 2123,
+        "sha256": "fad9a929ba18eee4"
       }
     },
     "CT-47a-4-a1": {
@@ -1000,16 +1013,16 @@
       ]
     },
     "E2": {
-      "source": "New Haven 311 reports (SeeClickFix)",
+      "source": "311 reports (SeeClickFix)",
       "url": "https://seeclickfix.com/new-haven",
       "data": {
         "search_area": "about 150 m around the address, last 24 months",
-        "total_reports": 225,
-        "reports_analyzed": 225,
+        "total_reports": 222,
+        "reports_analyzed": 222,
         "counts_by_type": {
           "Parking Violation": 42,
-          "Parks Request": 31,
-          "Missed Trash/Recycling": 24,
+          "Parks Request": 30,
+          "Missed Trash/Recycling": 23,
           "SNOW RELATED": 19,
           "Private Property Issue": 12,
           "Signs": 11,
@@ -1198,62 +1211,78 @@
       }
     },
     "E5": {
-      "source": "CT Parcel Data: all New Haven parcels owned by SFR 2 DE LLC",
+      "source": "CT Parcel Data: all Connecticut parcels owned by SFR 2 DE LLC",
       "url": "https://data.ct.gov/d/rny9-6ak2",
       "data": {
         "owner": "SFR 2 DE LLC",
-        "new_haven_parcels": 113,
-        "total_assessed_value_usd": 19227530,
+        "connecticut_parcels": 127,
+        "towns": 3,
+        "parcels_by_town": {
+          "New Haven": 113,
+          "Hamden": 11,
+          "West Haven": 3
+        },
+        "total_assessed_value_usd": 22426670,
         "largest_holdings": [
           {
             "location": "224 WOOSTER ST",
+            "town": "New Haven",
             "use": "APT5 - 12  MDL-94",
             "assessed_value_usd": 787640
           },
           {
             "location": "43 WILLIAM ST",
+            "town": "New Haven",
             "use": "APT5 - 12  MDL-94",
             "assessed_value_usd": 556010
           },
           {
             "location": "37 WILLIAM ST",
+            "town": "New Haven",
             "use": "APT5 - 12  MDL-94",
             "assessed_value_usd": 555170
           },
           {
             "location": "32 CLINTON AV",
+            "town": "New Haven",
             "use": "APT5 - 12  MDL-94",
             "assessed_value_usd": 452130
           },
           {
             "location": "30 PARDEE ST",
+            "town": "New Haven",
             "use": "APT5 - 12  MDL-94",
             "assessed_value_usd": 397180
           },
           {
+            "location": "206 WELTON ST",
+            "town": "Hamden",
+            "use": "Three Fam M01",
+            "assessed_value_usd": 348180
+          },
+          {
             "location": "244 SHERMAN AV",
+            "town": "New Haven",
             "use": "APT5 - 12 R  MDL-03",
             "assessed_value_usd": 335510
           },
           {
             "location": "75 LENOX ST",
+            "town": "New Haven",
             "use": "APT 4-Unit",
             "assessed_value_usd": 330960
           },
           {
-            "location": "151 HOWARD AV",
-            "use": "MIXED USE  MDL-94",
-            "assessed_value_usd": 310240
+            "location": "215 PECK AVE",
+            "town": "West Haven",
+            "use": "THREE FAM",
+            "assessed_value_usd": 324940
           },
           {
-            "location": "786 GEORGE ST",
-            "use": "APT 4-Unit",
-            "assessed_value_usd": 277760
-          },
-          {
-            "location": "157 HOWARD AV",
-            "use": "APT 4-Unit",
-            "assessed_value_usd": 272020
+            "location": "69 WEBB ST",
+            "town": "Hamden",
+            "use": "Three Fam M01",
+            "assessed_value_usd": 318920
           }
         ]
       }
@@ -1330,7 +1359,7 @@
       }
     },
     "E11": {
-      "source": "CT Business Registry principals for business 001t000000hJuPiAAK",
+      "source": "CT Business Registry: principals of SFR 2 DE LLC",
       "url": "https://data.ct.gov/d/ka36-64k6",
       "data": [
         {

@@ -1,0 +1,73 @@
+[
+  {
+    "feature": "Shortlist comparison (3 apartments)",
+    "requests": 24,
+    "input_tokens": 33745,
+    "cache_read_tokens": 3017,
+    "output_tokens": 6890,
+    "cost_usd": 0.00697,
+    "seconds": 33.5,
+    "status": "done",
+    "ranking": [
+      "C",
+      "B",
+      "A"
+    ]
+  },
+  {
+    "feature": "Listing scam check (listing_scam.txt)",
+    "requests": 4,
+    "input_tokens": 6033,
+    "cache_read_tokens": 3042,
+    "output_tokens": 750,
+    "cost_usd": 0.000747,
+    "seconds": 16.1,
+    "status": "done",
+    "risk": "High"
+  },
+  {
+    "feature": "Listing scam check (listing_normal.txt)",
+    "requests": 4,
+    "input_tokens": 5083,
+    "cache_read_tokens": 3529,
+    "output_tokens": 658,
+    "cost_usd": 0.000526,
+    "seconds": 57.8,
+    "status": "done",
+    "risk": "Low"
+  },
+  {
+    "feature": "Negotiation letter",
+    "requests": 1,
+    "input_tokens": 1361,
+    "cache_read_tokens": 0,
+    "output_tokens": 556,
+    "cost_usd": 0.000445,
+    "seconds": 5.2
+  },
+  {
+    "feature": "Practice negotiation (3 turns, tough landlord)",
+    "requests": 6,
+    "input_tokens": 4868,
+    "cache_read_tokens": 0,
+    "output_tokens": 409,
+    "cost_usd": 0.000691,
+    "seconds": 6.9,
+    "issues_won": [
+      1,
+      3
+    ]
+  },
+  {
+    "feature": "Organization batch (12 addresses)",
+    "requests": 1,
+    "input_tokens": 645,
+    "cache_read_tokens": 0,
+    "output_tokens": 318,
+    "cost_usd": 0.000224,
+    "seconds": 19.5,
+    "status": "done",
+    "listings_with_flags": 8,
+    "distinct_owners": 4
+  }
+]
