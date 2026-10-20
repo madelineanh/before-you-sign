@@ -4,6 +4,9 @@
 
 Every number in the two documents comes from docs/data/*.json (copied from logs/ after real runs), and
 every screenshot in docs/img/ is embedded, so both files open anywhere by double-click.
+
+User-study results: download them from http://127.0.0.1:8000/api/study?download=1, save the file as
+docs/data/study_results.json, and rebuild. Until that file exists, the documents show a marked placeholder.
 """
 
 from __future__ import annotations
@@ -131,6 +134,7 @@ def metrics() -> dict[str, str]:
     m["trace_rows"] = trace_rows(traced)
     m["safety_rows"] = "\n".join(f"<tr><td>{'PASS' if r['passed'] else 'FAIL'}</td><td>{html.escape(r['test'])}</td></tr>" for r in safety)
     m["effort_rows"] = effort_rows(low, med)
+    m["study_report"], m["study_slide"], m["study_kpi"], m["study_kpi_label"] = study_blocks()
     return m
 
 
@@ -176,6 +180,38 @@ def effort_rows(low: dict, med: dict) -> str:
                    f"<td>{l['flagged_red']} / {l['planted_issues']}</td><td>{l['flagged_red_with_statute']} / {l['planted_issues']}</td>"
                    f"<td>{l['false_alarm_reds_on_fair_lease']}</td></tr>")
     return "\n".join(out)
+
+
+def study_blocks() -> tuple[str, str, str, str]:
+    """Real user-study results if docs/data/study_results.json exists; otherwise a clearly marked placeholder."""
+    path = DATA / "study_results.json"
+    sessions = json.loads(path.read_text(encoding="utf-8"))["sessions"] if path.exists() else []
+    if not sessions:
+        todo = ('<div class="todo"><b>TO COMPLETE AFTER USER TESTING.</b> Run 2–3 sessions at http://127.0.0.1:8000/study, download '
+                'the results from /api/study?download=1, save them as docs/data/study_results.json, and run python docs/build.py. '
+                'This box is replaced automatically with the measured times, ratings and quotes.</div>')
+        return todo, '<div class="todo"><b>User-test results go here</b> (filled in automatically from the /study kit).</div>', "—", "user tests pending"
+    man = [s["manual_seconds"] for s in sessions if s["manual_seconds"]]
+    app = [s["app_seconds"] for s in sessions if s["app_seconds"]]
+    mmss = lambda s: f"{int(s // 60)}:{int(round(s % 60)):02d}"
+    saved = round(100 * (1 - statistics.median(app) / statistics.median(man))) if man and app else None
+    missed = sum(len([k for k in s["found_app"] if k not in s["found_manual"]]) for s in sessions)
+    useful = [s["useful"] for s in sessions if s.get("useful")]
+    rows = "".join(f"<tr><td>{html.escape(s['participant_id'])}</td><td>{html.escape(s['role'])}</td><td>{mmss(s['manual_seconds'])}</td>"
+                   f"<td>{mmss(s['app_seconds'])}</td><td>{len(s['found_manual'])}</td><td>{len(s['found_app'])}</td>"
+                   f"<td>{s.get('useful') or '–'}</td><td>{html.escape(s.get('would_use') or '–')}</td></tr>" for s in sessions)
+    quotes = "".join(f"<blockquote>“{html.escape(s['quote'].strip('“”\"'))}”<cite>{html.escape(s['participant_id'])}, "
+                     f"{html.escape(s['role'])}</cite></blockquote>" for s in sessions if s.get("quote"))
+    report = (f"<p>{len(sessions)} renter{'s' if len(sessions) != 1 else ''} checked an apartment they cared about, first by hand "
+              f"(any websites, up to 15 minutes), then with Before You Sign. Median time fell from <b>{mmss(statistics.median(man))}</b> "
+              f"to <b>{mmss(statistics.median(app))}</b>{f' ({saved}% less)' if saved is not None else ''}; across sessions the app "
+              f"surfaced <b>{missed}</b> items participants had missed by hand; average usefulness "
+              f"<b>{statistics.mean(useful):.1f}/5</b>.</p>"
+              f"<table class='t num'><thead><tr><th>Participant</th><th>Who</th><th>By hand</th><th>With app</th>"
+              f"<th>Items found by hand</th><th>Items shown by app</th><th>Useful (1–5)</th><th>Use again</th></tr></thead>"
+              f"<tbody>{rows}</tbody></table>{quotes}")
+    slide = quotes.split("</blockquote>")[0] + "</blockquote>" if quotes else ""
+    return report, slide, (f"{saved}%" if saved is not None else mmss(statistics.median(app))), f"less time than checking by hand ({len(sessions)} session{'s' if len(sessions) != 1 else ''})"
 
 
 def render(template: str, m: dict[str, str]) -> str:

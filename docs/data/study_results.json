@@ -1,0 +1,43 @@
+{
+  "sessions": [
+    {
+      "participant_id": "P1",
+      "saved_at": "2026-10-20T04:10:23.577554+00:00",
+      "role": "Graduate / professional student",
+      "lease": "own",
+      "manual_seconds": 660,
+      "app_seconds": 121,
+      "found_manual": [
+        "llc_people",
+        "owner",
+        "portfolio"
+      ],
+      "found_app": [
+        "complaints",
+        "evictions",
+        "flood",
+        "lease_issues",
+        "llc_people",
+        "owner",
+        "portfolio",
+        "questions"
+      ],
+      "features": [
+        "compare",
+        "language",
+        "letter",
+        "practice"
+      ],
+      "useful": 5,
+      "trust": 5,
+      "recommend": 10,
+      "would_use": "Yes",
+      "notes_manual": "",
+      "caught": "Issues with my lease such as a flood risk, management out of state address, and overcharging on late fees.",
+      "quote": "The app surfaced information about my address that I hadn’t found on my own, and made it easy to understand what was available in one place. The experience felt clear, useful, and surprisingly insightful. I especially appreciated how straightforward it was to explore the results. Overall, this is a thoughtful, polished app that makes finding relevant information feel effortless.",
+      "change": "NA",
+      "manual_seconds_recorded": 211,
+      "correction": "Participant reported the by-hand timer under-recorded; actual time by hand was about 11 minutes."
+    }
+  ]
+}
